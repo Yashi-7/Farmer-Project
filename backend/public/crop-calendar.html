@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🌾 Crop Advisory</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #F1FAF0;
+      color: #333;
+    }
+    h1 {
+      color: #1B5E20;
+      text-align: center;
+      margin-top: 30px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 30px;
+      background: #fff;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #E8F5E9;
+      color:#1B5E20 ;
+    }
+    td{
+      color:#424242 ;
+      padding: 10px;
+      border: 1px solid #ddd;
+    }
+    select, input[type="text"] {
+      margin-top: 10px;
+      padding: 5px;
+    }
+  
+    tr:nth-child(odd) {
+  background-color: #FFFFFF; 
+}
+
+tr:nth-child(even) {
+  background-color: #FFFBEA;
+}
+
+  .controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    /* margin-bottom: 20px; */
+    border: 1px solid #ccc;
+    border-radius: 35px;
+    width: 700px;
+    background-color: #F5F5DC;
+    padding: 10px;
+    height: 30px;
+    padding-bottom: 20px;
+    text-align: center;
+  }
+  input{
+    border-radius: 25px;
+    padding: 5px;
+    width: 200px;
+    border: transparent;
+  }
+  select{
+    border-radius: 25px;
+    padding: 5px;
+    width: 120px;
+    cursor: pointer;
+    opacity: 0.9;
+    border: transparent;
+  }
+  .contain{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #F1FAF0;
+  }
+  label{
+    font-size: 20px;
+  }
+  .crop-image {
+  margin-left: 6px;
+  height: 50px;      /* or width: 50px for square images */
+  width: 50px;
+  object-fit: cover;  /* ensures image fits nicely without distortion */
+  border-radius: 5px; /* rounded corners */
+   /* optional subtle border */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* optional shadow for depth */
+}
+
+
+</style>
+</head>
+<body>
+
+  <div class="contain">
+   <h1 id="cropHeading">CROP CALENDAR</h1>
+   <div class="controls">
+    <div class="feat">
+    <label for="languageSelect">🌐</label>
+    <select id="languageSelect">
+      <option value="en">English</option>
+      <option value="hi">हिन्दी</option>
+      <option va45lue="ml">മലയാളം</option>
+    </select>
+</div>
+<div class="feat">
+<label for="typeSelect">📂</label>
+<select id="typeSelect">
+  <option value="all">All</option>
+  <option value="Food">Food</option>
+  <option value="Commercial">Commercial</option>
+  <option value="Mixed">Mixed</option> 
+</select>
+</div>
+
+<!-- 🔍 Crop Search -->
+ <div class="feat">
+<label for="cropSearch">🔍</label>
+<input type="text" id="cropSearch" list="cropSuggestions" placeholder="Type crop name..." />
+<datalist id="cropSuggestions"></datalist>
+</div>
+</div>
+<!-- 📊 Advisory Table -->
+<table>
+  <thead>
+    <tr>
+      <th id="thImage">Image</th>
+      <th id="thCrop">Crop</th>
+      <th id="thType">Type</th>
+      <th id="thSeason">Season</th>
+      <th id="thMonths">Months</th>
+      <th id="thVarieties">Varieties</th>
+      <th id="thSoil">Soil</th>
+      <th id="thWeather">Weather</th>
+      <th id="thRotation">Rotation</th>
+      <th id="thNotes">Notes</th>
+      <th id="thPostHarvest">Post-Harvest</th>
+    </tr>
+  </thead>
+  <tbody id="calendarBody"></tbody>
+</table>
+
+  <input type="text" id="cropSearchInput" placeholder="Search crop..." />
+  <button id="cropSearchButton">🔍 Search</button>
+  <div id="cropAdvisoryContainer"></div>
+</div>
+
+  <!-- Advisory Script -->
+   <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+  <script>
+    let LANGUAGE = "en"; // Default language
+   // 🌐 Multilingual Labels
+const labels = {
+  en: {
+    title: "Crop Advisory", image: "Image",
+    crop: "Crop", type: "Type", season: "Season", months: "Months",
+    varieties: "Varieties", soil: "Soil", weather: "Weather", rotation: "Rotation",
+    notes: "Notes", postHarvest: "Post-Harvest"
+  },
+  hi: {
+    title: "फसल सलाह", image: "छवि" , crop: "फसल", type: "प्रकार", season: "ऋतु", months: "महीने",
+    varieties: "प्रजातियाँ", soil: "मिट्टी", weather: "मौसम", rotation: "फसल चक्र",
+    notes: "टिप्पणियाँ", postHarvest: "कटाई के बाद"
+  },
+  ml: {
+    title: "വിള ഉപദേശം",image: "ചിത്രം" , crop: "വിള", type: "തരം", season: "കാലം", months: "മാസങ്ങൾ",
+    varieties: "വരിയറ്റികൾ", soil: "മണ്ണ്", weather: "കാലാവസ്ഥ", rotation: "ചക്രം",
+    notes: "കുറിപ്പുകൾ", postHarvest: "വാരിയെടുത്തശേഷം"
+  }
+};
+
+// 🌾 Crop Data
+const crops = [  {
+    type_en: "Food", type_hi: "खाद्य", type_ml: "ഭക്ഷ്യവിള",
+    crop_en: "Rice", crop_hi: "चावल", crop_ml: "അരി",
+    season_en: "Kharif", season_hi: "खरीफ", season_ml: "ഖരീഫ്",
+    months_en: "Jun–Oct", months_hi: "जून–अक्टूबर", months_ml: "ജൂൺ–ഒക്ടോബർ",
+    varieties_en: "Jyothi, Uma", varieties_hi: "ज्योति, उमा", varieties_ml: "ജ്യോതി, ഉമ",
+    soil_en: "Clay loam", soil_hi: "चिकनी दोमट", soil_ml: "ക്ലേ ലോമി",
+    weather_en: "High rainfall", weather_hi: "अधिक वर्षा", weather_ml: "കൂടുതൽ മഴ",
+    rotation_en: "Green Gram", rotation_hi: "मूंग", rotation_ml: "പച്ച പയർ",
+    notes_en: "Needs standing water", notes_hi: "खड़ी पानी की आवश्यकता होती है", notes_ml: "നിലവാരമുള്ള വെള്ളം ആവശ്യമാണ്",
+    post_harvest_en: "Parboil and dry before milling", post_harvest_hi: "उबालें और सुखाएं", post_harvest_ml: "തിളപ്പിച്ച് ഉണക്കുക",
+    image: "rice-crop.jpg"
+  },
+   {
+    type_en: "Food", type_hi: "खाद्य", type_ml: "ഭക്ഷ്യവിള",
+    crop_en: "Finger Millet", crop_hi: "रागी", crop_ml: "കുറുവ",
+    season_en: "Kharif", season_hi: "खरीफ", season_ml: "ഖരീഫ്",
+    months_en: "Jul–Oct", months_hi: "जुलाई–अक्टूबर", months_ml: "ജൂലൈ–ഒക്ടോബർ",
+    varieties_en: "GPU 28, PRM 1", varieties_hi: "जीपीयू 28, पीआरएम 1", varieties_ml: "GPU 28, PRM 1",
+    soil_en: "Red loam", soil_hi: "लाल दोमट", soil_ml: "ചുവപ്പ് ലോമി",
+    weather_en: "Semi-arid", weather_hi: "अर्ध शुष्क", weather_ml: "അർദ്ധ ഉണങ്ങിയ",
+    rotation_en: "Pulses", rotation_hi: "दालें", rotation_ml: "പയർ",
+    notes_en: "Drought-tolerant, calcium-rich", notes_hi: "सूखा सहनशील, कैल्शियम युक्त", notes_ml: "വിയര്ച്ചയെ പ്രതിരോധിക്കുന്നതും കാൽസ്യം ധാരാളമുള്ളതും",
+    post_harvest_en: "Dry grains and store airtight", post_harvest_hi: "अनाज सुखाकर एयरटाइट रखें", post_harvest_ml: "അനാജ് ഉണക്കി വായുവടച്ചതിൽ സൂക്ഷിക്കുക",
+    image:"finger-millet.jpg"
+  },
+  {
+    type_en: "Food", type_hi: "खाद्य", type_ml: "ഭക്ഷ്യവിള",
+    crop_en: "Sweet Potato", crop_hi: "शकरकंद", crop_ml: "മധുരക്കിഴങ്ങ്",
+    season_en: "Post-monsoon", season_hi: "मानसून के बाद", season_ml: "മഴക്കാലത്തിന് ശേഷം",
+    months_en: "Oct–Jan", months_hi: "अक्टूबर–जनवरी", months_ml: "ഒക്ടോബർ–ജനുവരി",
+    varieties_en: "Sree Vardhini, CO 3", varieties_hi: "श्री वर्धिनी, सीओ 3", varieties_ml: "ശ്രീ വർധിനി, CO 3",
+    soil_en: "Sandy loam", soil_hi: "रेतीली दोमट", soil_ml: "മണൽ ലോമി",
+    weather_en: "Warm, humid", weather_hi: "गर्म, नम", weather_ml: "ചൂടുള്ള, ഈർപ്പം",
+    rotation_en: "Green Gram", rotation_hi: "मूंग", rotation_ml: "പച്ച പയർ",
+    notes_en: "Ideal for intercropping", notes_hi: "अंतरफसल के लिए उपयुक्त", notes_ml: "ഇടവിളയ്ക്കു അനുയോജ്യം",
+    post_harvest_en: "Cure roots and store cool", post_harvest_hi: "जड़ें सुखाकर ठंडा रखें", post_harvest_ml: "വേരുകൾ ഉണക്കി തണുത്ത സ്ഥലത്ത് സൂക്ഷിക്കുക",
+    image: "sweet-potato.jpg"
+  },
+  {
+    type_en: "Food", type_hi: "खाद्य", type_ml: "ഭക്ഷ്യവിള",
+    crop_en: "Pigeon Pea", crop_hi: "अरहर", crop_ml: "തുവരം",
+    season_en: "Kharif", season_hi: "खरीफ", season_ml: "ഖരീഫ്",
+    months_en: "Jun–Nov", months_hi: "जून–नवंबर", months_ml: "ജൂൺ–നവംബർ",
+    varieties_en: "ICPL 87119, BSMR 736", varieties_hi: "आईसीपीएल 87119, बीएसएमआर 736", varieties_ml: "ICPL 87119, BSMR 736",
+    soil_en: "Medium black soil", soil_hi: "मध्यम काली मिट्टी", soil_ml: "ഇടത്തരം കറുത്ത മണ്ണ്",
+    weather_en: "Warm, semi-arid", weather_hi: "गर्म, अर्ध शुष्क", weather_ml: "ചൂടുള്ള, അർദ്ധ ഉണങ്ങിയ",
+    rotation_en: "Sorghum", rotation_hi: "ज्वार", rotation_ml: "ചോരം",
+    notes_en: "Nitrogen-fixing legume", notes_hi: "नाइट्रोजन स्थिर करने वाली फली", notes_ml: "നൈട്രജൻ സ്ഥിരമാക്കുന്ന പയർ",
+    post_harvest_en: "Dry pods and thresh", post_harvest_hi: "फली सुखाकर थ्रेश करें", post_harvest_ml: "പയറ് ഉണക്കി ത്രഷ് ചെയ്യുക",image:'pigeon-pea.jpg'
+  },
+  {
+  type_en: "Food", type_hi: "खाद्य", type_ml: "ഭക്ഷ്യവിള",
+  crop_en: "Turmeric", crop_hi: "हल्दी", crop_ml: "മഞ്ഞൾ",
+  season_en: "Kharif", season_hi: "खरीफ", season_ml: "ഖരീഫ്",
+  months_en: "Jun–Nov", months_hi: "जून–नवंबर", months_ml: "ജൂൺ–നവംബർ",
+  varieties_en: "IISR Pragati, Suvarna, Suguna, Sudarshana",
+  varieties_hi: "आईआईएसआर प्रगति, सुवर्णा, सगुना, सुदर्शन",
+  varieties_ml: "ഐഐഎസ്ആർ പ്രഗതി, സുവർണ, സഗുന, സുധർശന",
+  soil_en: "Well-drained loamy or clay loam, rich in organic matter",
+  soil_hi: "अच्छी जल निकासी वाली दोमट या चिकनी दोमट, जैविक पदार्थों से भरपूर",
+  soil_ml: "നന്നായി വെള്ളം ഒഴുകുന്ന ലോമി അല്ലെങ്കിൽ കിളിരി ലോമി, ജൈവ വസ്തുക്കളിൽ സമ്പന്നമായ",
+  weather_en: "Warm and humid (20–35°C), 1500 mm+ rainfall",
+  weather_hi: "गर्म और आर्द्र (20–35°C), 1500 मिमी+ वर्षा",
+  weather_ml: "ചൂടും ഈർപ്പവും (20–35°C), 1500 മിമി+ മഴ",
+  rotation_en: "Green gram, Cowpea, Sunhemp",
+  rotation_hi: "मूंग, लोबिया, सनहेम्प",
+  rotation_ml: "പയർ, വാളപയർ, സൺഹെംപ്",
+  notes_en: "Turmeric is a rhizomatous crop with medicinal and culinary value; thrives in partial shade",
+  notes_hi: "हल्दी एक गांठदार फसल है जिसमें औषधीय और पाक मूल्य होता है; आंशिक छाया में अच्छी होती है",
+  notes_ml: "മഞ്ഞൾ ഒരു കിഴങ്ങ് വിളയാണ്, ഔഷധവും പാചകവിലയും ഉണ്ട്; ഭാഗിക നിഴലിൽ വളരുന്നു",
+  post_harvest_en: "Harvest after 7–8 months; boil, dry, and polish rhizomes",
+  post_harvest_hi: "7–8 महीने बाद कटाई करें; गांठों को उबालें, सुखाएं और चमकाएं",
+  post_harvest_ml: "7–8 മാസത്തിന് ശേഷം കൊയ്യുക; കിഴങ്ങുകൾ തിളപ്പിച്ച് ഉണക്കി പൊളിഷ് ചെയ്യുക",
+  image: "turmeric.jpg"
+},
+  {
+    type_en: "Food", type_hi: "खाद्य", type_ml: "ഭക്ഷ്യവിള",
+    crop_en: "Mustard", crop_hi: "सरसों", crop_ml: "കടുക്",
+    season_en: "Rabi", season_hi: "रबी", season_ml: "റബി",
+    months_en: "Nov–Feb", months_hi: "नवंबर–फरवरी", months_ml: "നവംബർ–ഫെബ്രുവരി",
+    varieties_en: "Varuna, Pusa Bold", varieties_hi: "वरुणा, पूसा बोल्ड", varieties_ml: "വരുണ, പുസ ബോൾഡ്",
+    soil_en: "Loamy", soil_hi: "दोमट", soil_ml: "ലോമി",
+    weather_en: "Cool, dry", weather_hi: "ठंडा, शुष्क", weather_ml: "തണുത്ത, ഉണങ്ങിയ",
+    rotation_en: "Wheat", rotation_hi: "गेहूं", rotation_ml: "ഗോതമ്പ്",
+    notes_en: "Oilseed crop, good for rotation", notes_hi: "तेल वाली फसल, फसल चक्र के लिए अच्छी", notes_ml: "എണ്ണവിള, ചക്രത്തിന് അനുയോജ്യം",
+    post_harvest_en: "Dry seeds and store in jute bags", post_harvest_hi: "बीज सुखाकर बोरी में रखें", post_harvest_ml: "വിത്തുകൾ ഉണക്കി ചാക്കിൽ സൂക്ഷിക്കുക",
+    image: "mustard.jpg"
+  },
+  {
+    type_en: "Food", type_hi: "खाद्य", type_ml: "ഭക്ഷ്യവിള",
+    crop_en: "Bajra", crop_hi: "बाजरा", crop_ml: "കമ്പ്",
+    season_en: "Kharif", season_hi: "खरीफ", season_ml: "ഖരീഫ്",
+    months_en: "Jul–Sep", months_hi: "जुलाई–सितंबर", months_ml: "ജൂലൈ–സെപ്റ്റംബർ",
+    varieties_en: "HHB 67, ICTP 8203", varieties_hi: "एचएचबी 67, आईसीटीपी 8203", varieties_ml: "HHB 67, ICTP 8203",
+    soil_en: "Sandy loam", soil_hi: "रेतीली दोमट", soil_ml: "മണൽ ലോമി",
+    weather_en: "Hot, dry", weather_hi: "गर्म, शुष्क", weather_ml: "ചൂടുള്ള, ഉണങ്ങിയ",
+    rotation_en: "Green Gram", rotation_hi: "मूंग", rotation_ml: "പച്ച പയർ",
+    notes_en: "Drought-resistant millet", notes_hi: "सूखा प्रतिरोधी बाजरा", notes_ml: "വിയര്ച്ചയെ പ്രതിരോധിക്കുന്ന കമ്പ്",
+    post_harvest_en: "Dry grains and store airtight", post_harvest_hi: "अनाज सुखाकर एयरटाइट रखें", post_harvest_ml: "അനാജ് ഉണക്കി വായുവടച്ചതിൽ സൂക്ഷിക്കുക",
+    image: "bajra.jpg"
+  },
+  {
+  type_en: "Commercial", type_hi: "व्यावसायिक", type_ml: "വാണിജ്യവിള",
+  crop_en: "Coffee", crop_hi: "कॉफी", crop_ml: "കാപ്പി",
+  season_en: "Post-Monsoon", season_hi: "मानसून के बाद", season_ml: "മഴക്കാലത്തിന് ശേഷം",
+  months_en: "Sep–Feb", months_hi: "सितंबर–फरवरी", months_ml: "സെപ്റ്റംബർ–ഫെബ്രുവരി",
+  varieties_en: "Arabica: Selection 795, Cauvery; Robusta: S.274, CxR",
+  varieties_hi: "अरबिका: सिलेक्शन 795, कावेरी; रोबस्टा: एस.274, सीxआर",
+  varieties_ml: "അറബിക്ക: സെലക്ഷൻ 795, കാവേരി; റോബസ്റ്റ: എസ്.274, CxR",
+  soil_en: "Well-drained deep loamy soil with pH 6.0–6.5",
+  soil_hi: "अच्छी जल निकासी वाली गहरी दोमट मिट्टी, पीएच 6.0–6.5",
+  soil_ml: "നന്നായി വെള്ളം ഒഴുകുന്ന ആഴമുള്ള ലോമി മണ്ണ്, പിഎച്ച് 6.0–6.5",
+  weather_en: "Cool, humid climate (15–28°C), 1200–2000 mm rainfall",
+  weather_hi: "ठंडी, आर्द्र जलवायु (15–28°C), 1200–2000 मिमी वर्षा",
+  weather_ml: "തണുത്തതും ഈർപ്പമുള്ളതുമായ കാലാവസ്ഥ (15–28°C), 1200–2000 മിമി മഴ",
+  rotation_en: "Intercropping with pepper, orange, or banana",
+  rotation_hi: "काली मिर्च, संतरा या केला के साथ अंतरफसल",
+  rotation_ml: "കുരുമുളക്, ഓറഞ്ച്, വാഴ എന്നിവയുമായി ഇടവേള വിളകൾ",
+  notes_en: "Shade-loving perennial crop; requires regular pruning and pest management",
+  notes_hi: "छाया पसंद करने वाली बहुवर्षीय फसल; नियमित छंटाई और कीट प्रबंधन आवश्यक",
+  notes_ml: "നിഴൽ ഇഷ്ടപ്പെടുന്ന ബഹുവർഷ വിള; സ്ഥിരമായ കൊയ്ത്തും കീട നിയന്ത്രണവും ആവശ്യമാണ്",
+  post_harvest_en: "Hand-pick ripe berries; process via wet or dry method; dry to 10–12% moisture",
+  post_harvest_hi: "पके हुए बेरी को हाथ से चुनें; गीले या सूखे तरीके से प्रोसेस करें; 10–12% नमी तक सुखाएं",
+  post_harvest_ml: "പാകമായ ബെറികൾ കൈകൊണ്ട് കൊയ്യുക; വെടിയോ ഉണക്കിയോ പ്രോസസ് ചെയ്യുക; 10–12% ഈർപ്പം വരെ ഉണക്കുക",
+  image: "coffe.jpg"
+},
+    {
+    type_en: "Commercial", type_hi: "व्यावसायिक", type_ml: "വാണിജ്യവിള",
+    crop_en: "Rubber", crop_hi: "रबर", crop_ml: "റബ്ബർ",
+    season_en: "Monsoon", season_hi: "मानसून", season_ml: "മഴക്കാലം",
+    months_en: "Jun–Jul", months_hi: "जून–जुलाई", months_ml: "ജൂൺ–ജൂലൈ",
+    varieties_en: "RRII 105", varieties_hi: "आरआरआईआई 105", varieties_ml: "RRII 105",
+    soil_en: "Laterite", soil_hi: "लेटराइट", soil_ml: "ലാറ്ററൈറ്റ്",
+    weather_en: "High humidity", weather_hi: "अधिक आर्द्रता", weather_ml: "കൂടുതൽ ഈർപ്പം",
+    rotation_en: "Cover Crops", rotation_hi: "आवरण फसलें", rotation_ml: "മൂടിയ വിളകൾ",
+    notes_en: "Long-term plantation crop", notes_hi: "दीर्घकालिक बागवानी फसल", notes_ml: "ദീർഘകാല തോട്ടവിള",
+    post_harvest_en: "Tap and process latex", post_harvest_hi: "टैप करें और लेटेक्स प्रोसेस करें", post_harvest_ml: "ടാപ്പ് ചെയ്ത് ലാറ്റക്സ് പ്രോസസ് ചെയ്യുക",
+    image: "rubber.jpg"
+  },
+  {
+  type_en: "Commercial", type_hi: "व्यावसायिक", type_ml: "വാണിജ്യവിള",
+  crop_en: "Coconut", crop_hi: "नारियल", crop_ml: "തെങ്ങ്",
+  season_en: "Tropical", season_hi: "उष्णकटिबंधीय", season_ml: "ഉഷ്ണമേഖല",
+  months_en: "Year-round", months_hi: "साल भर", months_ml: "വർഷം മുഴുവൻ",
+  varieties_en: "Kamroop, Kalpa Samrudhi, Kalpa Raksha, Kalpa Pratiba",
+  varieties_hi: "कामरूप, कल्प समृद्धि, कल्प रक्षा, कल्प प्रतिभा",
+  varieties_ml: "കാമ്രൂപ്പ്, കല്പ സമൃദ്ധി, കല്പ രക്ഷ, കല്പ പ്രതിഭ",
+  soil_en: "Laterite, alluvial, red sandy loam, coastal sandy",
+  soil_hi: "लेटराइट, जलोढ़, लाल बलुई दोमट, तटीय रेतीली",
+  soil_ml: "ലാറ്ററൈറ്റ്, അലൂവിയൽ, ചുവന്ന മണൽ ലോമി, തീര മണൽ",
+  weather_en: "Warm and humid (20–35°C)",
+  weather_hi: "गर्म और आर्द्र (20–35°C)",
+  weather_ml: "ചൂടും ഈർപ്പവും (20–35°C)",
+  rotation_en: "Intercropping with banana, pineapple, or legumes",
+  rotation_hi: "केला, अनानास या दलहनों के साथ अंतरफसल",
+  rotation_ml: "വാഴ, അനാനാസ്, പയർ എന്നിവയുമായി ഇടവേള വിളകൾ",
+  notes_en: "Requires well-drained soil and regular irrigation",
+  notes_hi: "अच्छी जल निकासी वाली मिट्टी और नियमित सिंचाई आवश्यक",
+  notes_ml: "നന്നായി വെള്ളം ഒഴുകുന്ന മണ്ണും സ്ഥിരമായ ജലസേചനവും ആവശ്യമാണ്",
+  post_harvest_en: "De-husk, dry, and process for oil or copra",
+  post_harvest_hi: "छिलका हटाएं, सुखाएं और तेल या खोपा के लिए प्रोसेस करें",
+  post_harvest_ml: "തോലുരിച്ച് ഉണക്കി എണ്ണയ്ക്കോ കൊപ്രയ്ക്കോ പ്രോസസ് ചെയ്യുക",
+  image: "cocunut.jpg"
+},
+  {
+    type_en: "Commercial", type_hi: "व्यावसायिक", type_ml: "വാണിജ്യവിള",
+    crop_en: "Pepper", crop_hi: "काली मिर्च", crop_ml: "കുരുമുളക്",
+    season_en: "Pre-monsoon", season_hi: "मानसून पूर्व", season_ml: "മഴക്കാലത്തിന് മുമ്പ്",
+    months_en: "Apr–May", months_hi: "अप्रैल–मई", months_ml: "ഏപ്രിൽ–മെയ്",
+    varieties_en: "Panniyur-1", varieties_hi: "पन्नियूर-1", varieties_ml: "പണ്ണിയൂർ-1",
+    soil_en: "Loamy", soil_hi: "दोमट", soil_ml: "ലോമി",
+    weather_en: "Shade, moist", weather_hi: "छाया, नम", weather_ml: "നിഴൽ, ഈർപ്പം",
+    rotation_en: "Ginger", rotation_hi: "अदरक", rotation_ml: "ഇഞ്ചി",
+    notes_en: "Requires support trees", notes_hi: "सहारा देने वाले पेड़ों की आवश्यकता", notes_ml: "താങ്ങ് വൃക്ഷങ്ങൾ ആവശ്യമാണ്",
+    post_harvest_en: "Sun-dry and pack", post_harvest_hi: "धूप में सुखाकर पैक करें", post_harvest_ml: "സൂര്യപ്രകാശത്തിൽ ഉണക്കി പാക്ക് ചെയ്യുക",
+    image: "pepper.jpg"
+  },
+  {
+    type_en: "Commercial", type_hi: "व्यावसायिक", type_ml: "വാണിജ്യവിള",
+    crop_en: "Ginger", crop_hi: "अदरक", crop_ml: "ഇഞ്ചി",
+    season_en: "Pre-monsoon", season_hi: "मानसून पूर्व", season_ml: "മഴക്കാലത്തിന് മുമ്പ്",
+    months_en: "Apr–May", months_hi: "अप्रैल–मई", months_ml: "ഏപ്രിൽ–മെയ്",
+    varieties_en: "Rio-de-Janeiro, IISR Varada", varieties_hi: "रियो-डी-जेनेरियो, आईआईएसआर वरदा", varieties_ml: "റിയോ-ഡി-ജനീറോ, ഐഐഎസ്ആർ വരദ",
+    soil_en: "Loamy, well-drained", soil_hi: "दोमट, अच्छी जल निकासी", soil_ml: "ലോമി, വെള്ളം ഒഴുകുന്ന മണ്ണ്",
+    weather_en: "Humid, shaded", weather_hi: "नम, छायायुक्त", weather_ml: "ആർദ്രവും നിഴലുള്ളതും",
+    rotation_en: "Turmeric", rotation_hi: "हल्दी", rotation_ml: "മഞ്ഞൾ",
+    notes_en: "Requires mulching and irrigation", notes_hi: "मल्चिंग और सिंचाई आवश्यक", notes_ml: "മൾച്ചിംഗും ജലസേചനവും ആവശ്യമാണ്",
+    post_harvest_en: "Wash, cure, and dry rhizomes", post_harvest_hi: "धोएं, सुखाएं और ठीक करें", post_harvest_ml: "കഴുകി ഉണക്കി ശുദ്ധീകരിക്കുക",
+    image: "ginger.jpg"
+  },
+  {
+    type_en: "Commercial", type_hi: "व्यावसायिक", type_ml: "വാണിജ്യവിള",
+    crop_en: "Arecanut", crop_hi: "सुपारी", crop_ml: "അടക്ക",
+    season_en: "Year-round", season_hi: "साल भर", season_ml: "വർഷം മുഴുവൻ",
+    months_en: "Any", months_hi: "कोई भी", months_ml: "ഏത് മാസവും",
+    varieties_en: "Mangala, Mohitnagar", varieties_hi: "मंगला, मोहितनगर", varieties_ml: "മംഗള, മോഹിത്നഗർ",
+    soil_en: "Laterite, well-drained", soil_hi: "लेटराइट, अच्छी जल निकासी", soil_ml: "ലാറ്ററൈറ്റ്, വെള്ളം ഒഴുകുന്ന മണ്ണ്",
+    weather_en: "Humid, tropical", weather_hi: "नम, उष्णकटिबंधीय", weather_ml: "ആർദ്രവും ഉഷ്ണമേഖലയും",
+    rotation_en: "Cover Crops", rotation_hi: "आवरण फसलें", rotation_ml: "മൂടിയ വിളകൾ",
+    notes_en: "Requires shade and irrigation", notes_hi: "छाया और सिंचाई आवश्यक", notes_ml: "നിഴലും ജലസേചനവും ആവശ്യമാണ്",
+    post_harvest_en: "Dehusk, boil, and sun-dry", post_harvest_hi: "छिलका हटाएं, उबालें और सुखाएं", post_harvest_ml: "തൊലി നീക്കംചെയ്യുക, തിളപ്പിക്കുക, ഉണക്കുക",
+    image: "arecanut.jpg"
+  },
+  {
+    type_en: "Commercial", type_hi: "व्यावसायिक", type_ml: "വാണിജ്യവിള",
+    crop_en: "Cocoa", crop_hi: "कोको", crop_ml: "കോക്കോ",
+    season_en: "Monsoon", season_hi: "मानसून", season_ml: "മഴക്കാലം",
+    months_en: "Jun–Sep", months_hi: "जून–सितंबर", months_ml: "ജൂൺ–സെപ്റ്റംബർ",
+    varieties_en: "ICCO 10", varieties_hi: "आईसीसीओ 10", varieties_ml: "ICCO 10",
+    soil_en: "Loamy", soil_hi: "दोमट", soil_ml: "ലോമി",
+    weather_en: "Humid, shaded", weather_hi: "नम, छायायुक्त", weather_ml: "ആർദ്രവും നിഴലുള്ളതും",
+    rotation_en: "Banana", rotation_hi: "केला", rotation_ml: "വാഴ",
+    notes_en: "Requires shade and irrigation", notes_hi: "छाया और सिंचाई आवश्यक", notes_ml: "നിഴലും ജലസേചനവും ആവശ്യമാണ്",
+    post_harvest_en: "Ferment, dry, and pack", post_harvest_hi: "किण्वन करें, सुखाएं और पैक करें", post_harvest_ml: "ഫെർമെന്റ് ചെയ്ത് ഉണക്കി പാക്ക് ചെയ്യുക",
+    image: "cocoa.jpg"
+  },
+  {
+  type_en: "Mixed", type_hi: "मिश्रित", type_ml: "മിശ്രവിള",
+  crop_en: "Okra + Groundnut", crop_hi: "भिंडी + मूंगफली", crop_ml: "വെണ്ട + നിലക്കടല",
+  season_en: "Summer", season_hi: "गर्मी", season_ml: "വേനൽ",
+  months_en: "Mar–Jun", months_hi: "मार्च–जून", months_ml: "മാർച്ച്–ജൂൺ",
+  varieties_en: "Arka Anamika + TMV 7", varieties_hi: "अर्का अनामिका + टीएमवी 7", varieties_ml: "അർക്ക അനാമിക + TMV 7",
+  soil_en: "Sandy loam", soil_hi: "रेतीली दोमट", soil_ml: "മണൽ ലോമി",
+  weather_en: "Warm, semi-humid", weather_hi: "गर्म, अर्ध नम", weather_ml: "ചൂടുള്ള, അർദ്ധ ഈർപ്പം",
+  rotation_en: "Sunflower", rotation_hi: "सूरजमुखी", rotation_ml: "സൂര്യകാന്തി",
+  notes_en: "Okra provides shade; groundnut improves soil fertility", notes_hi: "भिंडी छाया देती है; मूंगफली मिट्टी की उर्वरता बढ़ाती है", notes_ml: "വെണ്ട നിഴൽ നൽകുന്നു; നിലക്കടല മണ്ണിന്റെ ഫലഭൂമിത്വം വർദ്ധിപ്പിക്കുന്നു",
+  post_harvest_en: "Harvest pods early; dry groundnuts before shelling", post_harvest_hi: "फली जल्दी तोड़ें; मूंगफली को सुखाकर छीलें", post_harvest_ml: "പയറ് നേരത്തെ കൊയ്യുക; നിലക്കടല ഉണക്കി പൊട്ടിക്കുക",
+  image: "okra-groundnut.png"
+},
+   {
+    type_en: "Mixed", type_hi: "मिश्रित", type_ml: "മിശ്രവിള",
+    crop_en: "Maize + Cowpea", crop_hi: "मक्का + लोबिया", crop_ml: "ചോളം + വാളപയർ",
+    season_en: "Summer", season_hi: "गर्मी", season_ml: "വേനൽ",
+    months_en: "Mar–May", months_hi: "मार्च–मई", months_ml: "മാർച്ച്–മെയ്",
+    varieties_en: "COH 3 + VBN 1", varieties_hi: "सीओएच 3 + वीबीएन 1", varieties_ml: "COH 3 + VBN 1",
+    soil_en: "Sandy loam", soil_hi: "रेतीली दोमट", soil_ml: "മണൽ ലോമി",
+    weather_en: "Warm, dry", weather_hi: "गर्म, शुष्क", weather_ml: "ചൂടുള്ള, ഉണങ്ങിയ",
+    rotation_en: "Tomato", rotation_hi: "टमाटर", rotation_ml: "തക്കാളി",
+    notes_en: "Improves soil and yield", notes_hi: "मिट्टी और उपज सुधारता है", notes_ml: "മണ്ണും വിളവുമെല്ലാം മെച്ചപ്പെടുത്തുന്നു",
+    post_harvest_en: "Dry pods and shell maize", post_harvest_hi: "फली सुखाएं और मक्का छीलें", post_harvest_ml: "പയറ് ഉണക്കി ചോളം പൊട്ടിക്കുക",
+    image: "maize-cowpea.jpg"
+  },
+  {
+    type_en: "Mixed", type_hi: "मिश्रित", type_ml: "മിശ്രവിള",
+    crop_en: "Groundnut + Sunflower", crop_hi: "मूंगफली + सूरजमुखी", crop_ml: "നിലക്കടല + സൂര്യകാന്തി",
+    season_en: "Rabi", season_hi: "रबी", season_ml: "റബി",
+    months_en: "Nov–Feb", months_hi: "नवंबर–फरवरी", months_ml: "നവംബർ–ഫെബ്രുവരി",
+    varieties_en: "TMV 7 + CO 2", varieties_hi: "टीएमवी 7 + सीओ 2", varieties_ml: "TMV 7 + CO 2",
+    soil_en: "Red loam", soil_hi: "लाल दोमट", soil_ml: "ചുവപ്പ് ലോമി",
+    weather_en: "Dry, sunny", weather_hi: "शुष्क, धूप", weather_ml: "ഉണങ്ങിയ, സൂര്യപ്രകാശമുള്ള",
+    rotation_en: "Cowpea", rotation_hi: "लोबिया", rotation_ml: "വാളപയർ",
+    notes_en: "Oilseed-legume synergy", notes_hi: "तेल और फली का तालमेल", notes_ml: "എണ്ണവിളയും പയറും ചേർന്ന വിളവെടുപ്പ്",
+    post_harvest_en: "Sun-dry and store in sacks", post_harvest_hi: "धूप में सुखाकर बोरी में रखें", post_harvest_ml: "സൂര്യപ്രകാശത്തിൽ ഉണക്കി ചാക്കിൽ സൂക്ഷിക്കുക",
+    image: "sunflower-groundnut.jpg"
+  },
+  {
+  type_en: "Mixed", type_hi: "मिश्रित", type_ml: "മിശ്രവിള",
+  crop_en: "Coconut + Elephant Foot Yam", crop_hi: "नारियल + सूरन", crop_ml: "തെങ്ങ് + ചേന",
+  season_en: "Tropical", season_hi: "उष्णकटिबंधीय", season_ml: "ഉഷ്ണമേഖല",
+  months_en: "May–Sep", months_hi: "मई–सितंबर", months_ml: "മെയ്–സെപ്റ്റംബർ",
+  varieties_en: "Gajendra, Sree Padma", 
+  varieties_hi: "गजेंद्र, श्री पद्मा", 
+  varieties_ml: "ഗജേന്ദ്ര, ശ്രീ പത്മ",
+  soil_en: "Laterite, sandy loam, well-drained", 
+  soil_hi: "लेटराइट, बलुई दोमट, अच्छी जल निकासी वाली", 
+  soil_ml: "ലാറ്ററൈറ്റ്, മണൽ ലോമി, നന്നായി വെള്ളം ഒഴുകുന്ന",
+  weather_en: "Warm, humid (25–35°C)", 
+  weather_hi: "गर्म, आर्द्र (25–35°C)", 
+  weather_ml: "ചൂടും ഈർപ്പവും (25–35°C)",
+  rotation_en: "Green manure crops like sunn hemp", 
+  rotation_hi: "हरी खाद फसलें जैसे सनहेम्प", 
+  rotation_ml: "സൺഹെംപ് പോലുള്ള ഹരിത വള വിളകൾ",
+  notes_en: "Yam thrives in coconut shade and improves soil structure", 
+  notes_hi: "सूरन नारियल की छाया में फलता है और मिट्टी की संरचना सुधारता है", 
+  notes_ml: "ചേന തെങ്ങിന്റെ നിഴലിൽ വളരുന്നു, മണ്ണിന്റെ ഘടന മെച്ചപ്പെടുത്തുന്നു",
+  post_harvest_en: "Harvest tubers after 8–9 months; cure before storage", 
+  post_harvest_hi: "8–9 महीने बाद कंदों की कटाई करें; भंडारण से पहले सुखाएं", 
+  post_harvest_ml: "8–9 മാസത്തിന് ശേഷം കിഴങ്ങുകൾ കൊയ്യുക; സൂക്ഷിക്കുന്നതിന് മുമ്പ് ഉണക്കുക",
+  image: "cocu-ele.jpg"
+},
+  {
+    type_en: "Mixed", type_hi: "मिश्रित", type_ml: "മിശ്രവിള",
+    crop_en: "Tomato + Coriander", crop_hi: "टमाटर + धनिया", crop_ml: "തക്കാളി + മല്ലി",
+    season_en: "Winter", season_hi: "सर्दी", season_ml: "ശീതകാലം",
+    months_en: "Dec–Feb", months_hi: "दिसंबर–फरवरी", months_ml: "ഡിസംബർ–ഫെബ്രുവരി",
+    varieties_en: "Mukthi + Local", varieties_hi: "मुक्ति + स्थानीय", varieties_ml: "മുക്തി + പ്രാദേശിക",
+    soil_en: "Loamy", soil_hi: "दोमट", soil_ml: "ലോമി",
+    weather_en: "Mild, dry", weather_hi: "हल्का, शुष्क", weather_ml: "മിതമായ, ഉണങ്ങിയ",
+    rotation_en: "Spinach", rotation_hi: "पालक", rotation_ml: "ചീര",
+    notes_en: "Short cycle intercrop", notes_hi: "छोटे चक्र की अंतरफसल", notes_ml: "ചുരുങ്ങിയ കാലയളവിലെ ഇടവിള",
+    post_harvest_en: "Dry coriander, refrigerate tomato", post_harvest_hi: "धनिया सुखाएं, टमाटर फ्रिज में रखें", post_harvest_ml: "മല്ലി ഉണക്കി തക്കാളി ഫ്രിഡ്ജിൽ സൂക്ഷിക്കുക",
+    image: "coriander-tomato.jpg"
+  },
+  {
+    type_en: "Mixed", type_hi: "मिश्रित", type_ml: "മിശ്രവിള",
+    crop_en: "Chili + Onion", crop_hi: "मिर्च + प्याज", crop_ml: "മുളക് + സവാള",
+    season_en: "Kharif", season_hi: "खरीफ", season_ml: "ഖരീഫ്",
+    months_en: "Jul–Oct", months_hi: "जुलाई–अक्टूबर", months_ml: "ജൂലൈ–ഒക്ടോബർ",
+    varieties_en: "Guntur + CO 5", varieties_hi: "गुंटूर + सीओ 5", varieties_ml: "ഗുണ്ടൂർ + CO 5",
+    soil_en: "Black soil", soil_hi: "काली मिट्टी", soil_ml: "കറുത്ത മണ്ണ്",
+    weather_en: "Hot, dry", weather_hi: "गर्म, शुष्क", weather_ml: "ചൂടുള്ള, ഉണങ്ങിയ",
+    rotation_en: "Garlic", rotation_hi: "लहसुन", rotation_ml: "വെളുത്തുള്ളി",
+    notes_en: "Market-driven combo", notes_hi: "बाजार आधारित संयोजन", notes_ml: "ചന്തയിൽ ആവശ്യമായ വിളകൾ",
+    post_harvest_en: "Dry and cure bulbs", post_harvest_hi: "बल्ब सुखाएं और ठीक करें", post_harvest_ml: "ബൾബുകൾ ഉണക്കി ശുദ്ധീകരിക്കുക",
+    image: "onion-chilli.jpg"
+  },
+  {
+    type_en: "Mixed", type_hi: "मिश्रित", type_ml: "മിശ്രവിള",
+    crop_en: "Sorghum + Pigeon Pea", crop_hi: "ज्वार + अरहर", crop_ml: "ചോരം + തുവരം",
+    season_en: "Rabi", season_hi: "रबी", season_ml: "റബി",
+    months_en: "Oct–Jan", months_hi: "अक्टूबर–जनवरी", months_ml: "ഒക്ടോബർ–ജനുവരി",
+    varieties_en: "SPV 462 + ICP 7035", varieties_hi: "एसपीवी 462 + आईसीपी 7035", varieties_ml: "SPV 462 + ICP 7035",
+    soil_en: "Medium loam", soil_hi: "मध्यम दोमट", soil_ml: "ഇടത്തരം ലോമി",
+    weather_en: "Dry, cool", weather_hi: "शुष्क, ठंडा", weather_ml: "ഉണങ്ങിയ, തണുത്ത",
+    rotation_en: "Mustard", rotation_hi: "सरसों", rotation_ml: "കടുക്",
+    notes_en: "Staggered maturity", notes_hi: "अलग-अलग पकने का समय", notes_ml: "വിവിധ സമയങ്ങളിൽ വിളവെടുപ്പ്",
+    post_harvest_en: "Dry grains and thresh separately", post_harvest_hi: "अनाज सुखाएं और अलग-अलग थ्रेश करें", post_harvest_ml: "അനാജ് ഉണക്കി വേർതിരിച്ച് ത്രഷ് ചെയ്യുക",
+    image: "sorghum.jpg"
+  }];
+
+// 🔍 Fuzzy Match
+function fuzzyMatch(input, target) {
+  if (!input || !target) return false;
+  input = input.toLowerCase();
+  target = target.toLowerCase();
+  return target.includes(input) || levenshteinDistance(input, target) <= 1;
+}
+
+// 🔢 Levenshtein Distance
+function levenshteinDistance(a, b) {
+  const matrix = Array.from({ length: a.length + 1 }, () => Array(b.length + 1).fill(0));
+  for (let i = 0; i <= a.length; i++) matrix[i][0] = i;
+  for (let j = 0; j <= b.length; j++) matrix[0][j] = j;
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      matrix[i][j] = Math.min(
+        matrix[i - 1][j] + 1,
+        matrix[i][j - 1] + 1,
+        matrix[i - 1][j - 1] + cost
+      );
+    }
+  }
+  return matrix[a.length][b.length];
+}
+
+// 🧠 Update Table Headers
+function updateCalendarLabels() {
+  const dict = labels[LANGUAGE];
+  const ids = {
+    calendarTitle: dict.title,
+    thImage: dict.image,
+    thCrop: dict.crop,
+    thType: dict.type,
+    thSeason: dict.season,
+    thMonths: dict.months,
+    thVarieties: dict.varieties,
+    thSoil: dict.soil,
+    thWeather: dict.weather,
+    thRotation: dict.rotation,
+    thNotes: dict.notes,
+    thPostHarvest: dict.postHarvest
+  };
+  Object.entries(ids).forEach(([id, text]) => {
+    const el = document.getElementById(id);
+    if (el) el.innerText = text;
+  });
+}
+
+// 🌱 Update Crop Suggestions
+function updateSuggestions() {
+  const datalist = document.getElementById("cropSuggestions");
+  datalist.innerHTML = "";
+  const uniqueNames = new Set();
+  crops.forEach(crop => {
+    const name = crop[`crop_${LANGUAGE}`];
+    if (name) uniqueNames.add(name);
+  });
+  [...uniqueNames].forEach(name => {
+    const option = document.createElement("option");
+    option.value = name;
+    datalist.appendChild(option);
+  });
+}
+
+// 🔍 Search and Render Crop Advisory
+function searchCrop() {
+  const search = document.getElementById("cropSearch").value.toLowerCase();
+  const selectedType = document.getElementById("typeSelect").value;
+  const body = document.getElementById("calendarBody");
+  body.innerHTML = "";
+
+  let matchFound = false;
+
+  crops.forEach(crop => {
+    const cropNames = [
+      crop.crop_en?.toLowerCase(),
+      crop.crop_hi?.toLowerCase(),
+      crop.crop_ml?.toLowerCase()
+    ];
+    const extendedFields = [
+      crop.varieties_en, crop.varieties_hi, crop.varieties_ml,
+      crop.soil_en, crop.soil_hi, crop.soil_ml,
+      crop.rotation_en, crop.rotation_hi, crop.rotation_ml
+    ];
+    const matchesSearch =
+      !search ||
+      cropNames.some(name => fuzzyMatch(search, name)) ||
+      extendedFields.some(field => fuzzyMatch(search, field?.toLowerCase()));
+    const matchesType = selectedType === "all" || crop.type_en === selectedType;
+
+    if (matchesSearch && matchesType) {
+      matchFound = true;
+      const row = `<tr>
+        <td><img src="${crop.image}" alt="${crop[`crop_${LANGUAGE}`]}" class="crop-image"></td>
+        <td>${crop[`crop_${LANGUAGE}`]}</td>
+        <td>${crop[`type_${LANGUAGE}`]}</td>
+        <td>${crop[`season_${LANGUAGE}`]}</td>
+        <td>${crop[`months_${LANGUAGE}`]}</td>
+        <td>${crop[`varieties_${LANGUAGE}`]}</td>
+        <td>${crop[`soil_${LANGUAGE}`]}</td>
+        <td>${crop[`weather_${LANGUAGE}`]}</td>
+        <td>${crop[`rotation_${LANGUAGE}`]}</td>
+        <td>${crop[`notes_${LANGUAGE}`]}</td>
+        <td>${crop[`post_harvest_${LANGUAGE}`]}</td>
+      </tr>`;
+      body.innerHTML += row;
+    }
+  });
+
+  if (!matchFound) {
+    const noInfo = {
+      en: "🚫 No information available for this crop.",
+      hi: "🚫 इस फसल के लिए कोई जानकारी उपलब्ध नहीं है।",
+      ml: "🚫 ഈ വിളയെക്കുറിച്ച് വിവരങ്ങൾ ലഭ്യമല്ല."
+    };
+    body.innerHTML = `<tr><td colspan="10">${noInfo[LANGUAGE]}</td></tr>`;
+  }
+}
+
+// 🔁 Event Listeners
+document.getElementById("typeSelect").addEventListener("change", searchCrop);
+document.getElementById("cropSearch").addEventListener("input", searchCrop);
+document.getElementById("languageSelect").addEventListener("change", (e) => {
+  LANGUAGE = e.target.value;
+  updateCalendarLabels();
+  updateSuggestions();
+  searchCrop();
+});
+
+window.onload = function () {
+  LANGUAGE = document.getElementById("languageSelect").value || "en";
+  updateCalendarLabels();
+  updateSuggestions();
+  searchCrop();
+};
+// 🌐 Global Language Declaration
+// 🌐 Global Language Declaration
+
+let lastQuery = "";
+let lastMatch = null;
+
+
+// 🌾 Crop Data
+const advisoryData  = [
+  {
+      crop_en: "Finger Millet", crop_hi: "रागी", crop_ml: "കുറുവ",
+      soil_en: "Red loam, well-drained", soil_hi: "लाल दोमट, अच्छी जल निकासी", soil_ml: "ചുവപ്പ് ലോമി, നന്നായി ഒഴുകുന്ന",
+      weather_en: "Semi-arid, 25–35°C", weather_hi: "अर्ध शुष्क, 25–35°C", weather_ml: "അർദ്ധ ഉണങ്ങിയ, 25–35°C",
+      cultivation_en: "Sow in July, spacing 30x10 cm, weed twice", cultivation_hi: "जुलाई में बोएं, 30x10 सेमी की दूरी, दो बार निराई", cultivation_ml: "ജൂലൈയിൽ വിതയ്ക്കുക, 30x10 സെ.മീ., രണ്ട് തവണ കളമാറ്റം",
+      fertilizer_en: "FYM 5t/ha + 40:20:20 NPK", fertilizer_hi: "एफवाईएम 5 टन/हेक्टेयर + 40:20:20 एनपीके", fertilizer_ml: "FYM 5 ടൺ/ഹെ + 40:20:20 NPK",
+      pesticide_en: "Neem oil or Chlorpyrifos for aphids", pesticide_hi: "एफिड्स के लिए नीम तेल या क्लोरोपायरीफॉस", pesticide_ml: "അഫിഡുകൾക്ക് നീം ഓയിൽ അല്ലെങ്കിൽ ക്ലോറോപൈറിഫോസ്",
+      diseases_en: "Blast, root rot; treat with Mancozeb", diseases_hi: "ब्लास्ट, रूट रॉट; मैंकोजेब से उपचार", diseases_ml: "ബ്ലാസ്റ്റ്, റൂട്ട് റോട്ടു; മാങ്കോസെബ് ഉപയോഗിക്കുക",
+      post_en: "Harvest when grains harden, dry and store airtight", post_hi: "अनाज कठोर होने पर कटाई करें, सुखाएं और एयरटाइट रखें", post_ml: "അനാജ് കഠിനമാകുമ്പോൾ വിളവെടുപ്പ്, ഉണക്കി വായുവടച്ചതിൽ സൂക്ഷിക്കുക",
+      rotation_en: "Pulses or legumes to fix nitrogen", rotation_hi: "नाइट्रोजन के लिए दालें या फलियां", rotation_ml: "നൈട്രജൻ നിശ്ചയിക്കാൻ പൾസുകൾ അല്ലെങ്കിൽ പയർവളങ്ങൾ",
+      notes_en: "Drought-tolerant and calcium-rich", notes_hi: "सूखा सहनशील और कैल्शियम युक्त", notes_ml: "വിയർപ്പ് പ്രതിരോധശേഷിയുള്ളതും കാൽസ്യം സമ്പന്നവുമാണ്"
+    },
+    {
+      crop_en: "Tomato", crop_hi: "टमाटर", crop_ml: "തക്കാളി",
+      soil_en: "Sandy loam, rich in organic matter", soil_hi: "रेतीली दोमट, जैविक पदार्थों से भरपूर", soil_ml: "സാൻഡി ലോമി, ജൈവ വസ്തുക്കൾ സമ്പന്നം",
+      weather_en: "Mild climate, 20–25°C", weather_hi: "समशीतोष्ण जलवायु, 20–25°C", weather_ml: "മിതമായ കാലാവസ്ഥ, 20–25°C",
+      cultivation_en: "Transplant 25-day-old seedlings; staking improves yield", cultivation_hi: "25 दिन पुराने पौधों की रोपाई करें; सहारा देने से उपज बढ़ती है", cultivation_ml: "25 ദിവസമായ ചെടികൾ മാറ്റിവയ്ക്കുക; താങ്ങ് ഉപയോഗിക്കുന്നത് വിളവെടുപ്പ് വർദ്ധിപ്പിക്കും",
+      fertilizer_en: "100:50:50 NPK + FYM 10t/ha", fertilizer_hi: "100:50:50 एनपीके + एफवाईएम 10 टन/हेक्टेयर", fertilizer_ml: "100:50:50 NPK + FYM 10 ടൺ/ഹെ",
+      pesticide_en: "Fruit borer – Spinosad; whitefly – Imidacloprid", pesticide_hi: "फल छेदक – स्पिनोसैड; सफेद मक्खी – इमिडाक्लोप्रिड", pesticide_ml: "ഫല ബോറർ – സ്പിനോസാഡ്; വൈറ്റ്‌ഫ്ലൈ – ഇമിഡാക്ലോപ്രിഡ്",
+      diseases_en: "Early blight, bacterial wilt; treat with Copper oxychloride", diseases_hi: "अर्ली ब्लाइट, जीवाणु विल्ट; कॉपर ऑक्सीक्लोराइड से उपचार", diseases_ml: "ആദ്യ ബ്ലൈറ്റ്, ബാക്ടീരിയൽ വിൽറ്റ്; കോപ്പർ ഓക്സിക്ലോറൈഡ് ഉപയോഗിക്കുക",
+      post_en: "Harvest at breaker stage; store at 12–15°C", post_hi: "ब्रेकिंग अवस्था में कटाई करें; 12–15°C पर स्टोर करें", post_ml: "ബ്രേക്കർ ഘട്ടത്തിൽ വിളവെടുപ്പ്; 12–15°C-ൽ സൂക്ഷിക്കുക",
+      rotation_en: "Onion, okra", rotation_hi: "प्याज, भिंडी", rotation_ml: "ഉള്ളി, വെണ്ട",
+      notes_en: "Mulching helps retain moisture and reduce weeds", notes_hi: "मल्चिंग से नमी बनी रहती है और खरपतवार कम होते हैं", notes_ml: "മൾച്ചിംഗ് ഈർപ്പം നിലനിർത്താനും പുല്ലുകൾ കുറയ്ക്കാനും സഹായിക്കുന്നു"
+    },{
+  crop_en: "Rice", crop_hi: "धान", crop_ml: "അരി",
+  soil_en: "Clay loam, high water retention", soil_hi: "चिकनी दोमट, उच्च जल धारण क्षमता", soil_ml: "ക്ലേ ലോമി, ഉയർന്ന ജലധാരിത",
+  weather_en: "High rainfall, warm humid climate", weather_hi: "अधिक वर्षा, गर्म आर्द्र जलवायु", weather_ml: "ഉയർന്ന മഴ, ചൂടുള്ള ഈർപ്പം",
+  cultivation_en: "Transplant 20–25 day-old seedlings; spacing 20x15 cm", cultivation_hi: "20–25 दिन पुराने पौधों की रोपाई करें; दूरी 20x15 सेमी", cultivation_ml: "20–25 ദിവസമായ ചെടികൾ മാറ്റിവയ്ക്കുക; ഇടവേള 20x15 സെ.മീ.",
+  fertilizer_en: "100:50:50 NPK kg/ha; add zinc sulfate if deficient", fertilizer_hi: "100:50:50 एनपीके किग्रा/हेक्टेयर; जिंक सल्फेट जोड़ें", fertilizer_ml: "100:50:50 NPK കിലോ/ഹെ; തകരാറുണ്ടെങ്കിൽ സിങ്ക് സൾഫേറ്റ് ചേർക്കുക",
+  pesticide_en: "Brown planthopper – Imidacloprid; stem borer – Chlorantraniliprole", pesticide_hi: "ब्राउन प्लांथॉपर – इमिडाक्लोप्रिड; स्टेम बोरर – क्लोरान्ट्रानिलिप्रोल", pesticide_ml: "ബ്രൗൺ പ്ലാന്റ്‌ഹോപ്പർ – ഇമിഡാക്ലോപ്രിഡ്; സ്റ്റെം ബോറർ – ക്ലോറാന്ട്രാനിലിപ്രോൾ",
+  diseases_en: "Blast, sheath blight; treat with Tricyclazole", diseases_hi: "ब्लास्ट, शीथ ब्लाइट; ट्राइसाइक्लाज़ोल से उपचार", diseases_ml: "ബ്ലാസ്റ്റ്, ഷീത്ത് ബ്ലൈറ്റ്; ട്രൈസൈക്ലാസോൾ ഉപയോഗിക്കുക",
+  post_en: "Harvest when grains harden; dry and store airtight", post_hi: "अनाज कठोर होने पर कटाई करें; सुखाएं और एयरटाइट रखें", post_ml: "അനാജ് കഠിനമാകുമ്പോൾ വിളവെടുപ്പ്; ഉണക്കി വായുവടച്ചതിൽ സൂക്ഷിക്കുക",
+  rotation_en: "Green gram, mustard", rotation_hi: "मूंग, सरसों", rotation_ml: "പയർ, കടുക്",
+  notes_en: "Needs puddling before transplanting", notes_hi: "रोपाई से पहले मिट्टी को गीला करना आवश्यक", notes_ml: "മാറ്റിവയ്ക്കുന്നതിന് മുമ്പ് മണ്ണ് പാടം ചെയ്യണം"
+},{
+  crop_en: "Groundnut", crop_hi: "मूंगफली", crop_ml: "നിലക്കടല",
+  soil_en: "Sandy loam, well-drained", soil_hi: "रेतीली दोमट, अच्छी जल निकासी", soil_ml: "സാൻഡി ലോമി, നന്നായി ഒഴുകുന്ന",
+  weather_en: "Warm climate, 25–35°C", weather_hi: "गर्म जलवायु, 25–35°C", weather_ml: "ചൂടുള്ള കാലാവസ്ഥ, 25–35°C",
+  cultivation_en: "Sow in June; spacing 30x10 cm; avoid waterlogging", cultivation_hi: "जून में बोएं; दूरी 30x10 सेमी; जलभराव से बचें", cultivation_ml: "ജൂണിൽ വിതയ്ക്കുക; 30x10 സെ.മീ.; വെള്ളം കെട്ടുന്നത് ഒഴിവാക്കുക",
+  fertilizer_en: "FYM 5t/ha + 20:40:20 NPK", fertilizer_hi: "एफवाईएम 5 टन/हेक्टेयर + 20:40:20 एनपीके", fertilizer_ml: "FYM 5 ടൺ/ഹെ + 20:40:20 NPK",
+  pesticide_en: "Leaf miner – Quinalphos; aphids – Neem extract", pesticide_hi: "लीफ माइनर – क्विनालफॉस; एफिड्स – नीम अर्क", pesticide_ml: "ഇല മൈനർ – ക്വിനാൽഫോസ്; അഫിഡുകൾ – നീം എക്സ്ട്രാക്റ്റ്",
+  diseases_en: "Collar rot, leaf spot; treat with Mancozeb", diseases_hi: "कॉलीर रॉट, लीफ स्पॉट; मैंकोजेब से उपचार", diseases_ml: "കോളർ റോട്ടു, ഇല പാടുകൾ; മാങ്കോസെബ് ഉപയോഗിക്കുക",
+  post_en: "Harvest when leaves yellow; dry pods and store in cool place", post_hi: "पत्ते पीले होने पर कटाई करें; फली सुखाकर ठंडी जगह रखें", post_ml: "ഇലകൾ മങ്ങുമ്പോൾ വിളവെടുപ്പ്; തൊലി ഉണക്കി തണുത്ത സ്ഥലത്ത് സൂക്ഷിക്കുക",
+  rotation_en: "Maize, sunflower", rotation_hi: "मक्का, सूरजमुखी", rotation_ml: "ചോളം, സൂര്യകാന്തി",
+  notes_en: "Avoid excess nitrogen; promotes vegetative growth", notes_hi: "अधिक नाइट्रोजन से बचें; यह पत्तों की वृद्धि को बढ़ाता है", notes_ml: "അധിക നൈട്രജൻ ഒഴിവാക്കുക; ഇല വളർച്ചയ്ക്ക് കാരണമാകും"
+},
+{
+  crop_en: "Coconut", crop_hi: "नारियल", crop_ml: "തെങ്ങ്",
+  soil_en: "Sandy loam, well-drained, rich in organic matter", soil_hi: "रेतीली दोमट, अच्छी जल निकासी, जैविक पदार्थों से भरपूर", soil_ml: "സാൻഡി ലോമി, നന്നായി ഒഴുകുന്ന, ജൈവ വസ്തുക്കൾ സമ്പന്നം",
+  weather_en: "Humid tropical climate, 27–32°C", weather_hi: "उष्णकटिबंधीय आर्द्र जलवायु, 27–32°C", weather_ml: "ഉഷ്ണമേഖലാ ഈർപ്പം, 27–32°C",
+  cultivation_en: "Plant seedlings with 7x7 m spacing; apply mulch and irrigate regularly", cultivation_hi: "7x7 मीटर की दूरी पर पौध रोपें; मल्चिंग करें और नियमित सिंचाई करें", cultivation_ml: "7x7 മീ. ഇടവേളയിൽ തൈകൾ നട്ടുക; മൾച്ച് ചെയ്യുക, നിരന്തരം ജലസേചനം ചെയ്യുക",
+  fertilizer_en: "FYM 10kg/tree + 500:320:120 NPK g/tree/year", fertilizer_hi: "एफवाईएम 10 किग्रा/वृक्ष + 500:320:120 एनपीके ग्राम/वृक्ष/वर्ष", fertilizer_ml: "FYM 10 കിലോ/വൃക്ഷം + 500:320:120 NPK ഗ്രാം/വൃക്ഷം/വർഷം",
+  pesticide_en: "Rhinoceros beetle – apply neem cake; red palm weevil – pheromone traps", pesticide_hi: "गैंडा बीटल – नीम खली डालें; लाल पाम वीविल – फेरोमोन ट्रैप लगाएं", pesticide_ml: "റൈനോസറോസ് ബീറ്റിൽ – നീം കേക്ക് ഉപയോഗിക്കുക; റെഡ് പാം വീവിൽ – ഫെറോമോൺ ട്രാപ്പുകൾ",
+  diseases_en: "Bud rot – treat with Bordeaux paste; stem bleeding – apply Tridemorph", diseases_hi: "बड रॉट – बोर्डो पेस्ट से उपचार; स्टेम ब्लीडिंग – ट्राइडेमॉर्फ लगाएं", diseases_ml: "ബഡ് റോട്ടു – ബോർഡോ പേസ്റ്റ് ഉപയോഗിക്കുക; സ്റ്റെം ബ്ലീഡിംഗ് – ട്രൈഡെമോർഫ് ഉപയോഗിക്കുക",
+  post_en: "Harvest mature nuts every 45–60 days; store in dry shade", post_hi: "हर 45–60 दिन में परिपक्व नारियल की कटाई करें; सूखी छाया में रखें", post_ml: "45–60 ദിവസത്തിന് ഇടയിൽ വിളവെടുപ്പ്; ഉണക്കിയ നിഴലിൽ സൂക്ഷിക്കുക",
+  rotation_en: "Intercrop with banana, pepper, or pineapple", rotation_hi: "केले, काली मिर्च या अनानास के साथ अंतर्वर्तन करें", rotation_ml: "വാഴ, കുരുമുളക്, അന്നാനാസ് എന്നിവയുമായി ഇന്റർക്രോപ്പ് ചെയ്യുക",
+  notes_en: "Mulching and basin irrigation improve yield", notes_hi: "मल्चिंग और बेसिन सिंचाई से उपज बढ़ती है", notes_ml: "മൾച്ചിംഗും ബേസിൻ ജലസേചനവും വിളവെടുപ്പ് വർദ്ധിപ്പിക്കും"
+},
+{
+  crop_en: "Black Pepper", crop_hi: "काली मिर्च", crop_ml: "കുരുമുളക്",
+  soil_en: "Laterite or loamy soil, rich in organic matter", soil_hi: "लेटराइट या दोमट मिट्टी, जैविक पदार्थों से भरपूर", soil_ml: "ലാറ്ററൈറ്റ് അല്ലെങ്കിൽ ലോമി മണ്ണ്, ജൈവ വസ്തുക്കൾ സമ്പന്നം",
+  weather_en: "Warm humid climate, 20–30°C, high rainfall", weather_hi: "गर्म आर्द्र जलवायु, 20–30°C, अधिक वर्षा", weather_ml: "ചൂടുള്ള ഈർപ്പം, 20–30°C, ഉയർന്ന മഴ",
+  cultivation_en: "Train vines on support trees or poles; prune regularly", cultivation_hi: "लताओं को सहारा देने वाले पेड़ों या खंभों पर चढ़ाएं; नियमित छंटाई करें", cultivation_ml: "വള്ളികൾ താങ്ങ് മരങ്ങളിലോ പോളുകളിലോ കയറ്റുക; പതിവായി പ്രൂൺ ചെയ്യുക",
+  fertilizer_en: "FYM 10kg/vine + 100:40:40 NPK g/vine/year", fertilizer_hi: "एफवाईएम 10 किग्रा/लता + 100:40:40 एनपीके ग्राम/लता/वर्ष", fertilizer_ml: "FYM 10 കിലോ/വള്ളി + 100:40:40 NPK ഗ്രാം/വള്ളി/വർഷം",
+  pesticide_en: "Pollu beetle – spray neem oil; scale insects – apply soap solution", pesticide_hi: "पोलू बीटल – नीम तेल छिड़कें; स्केल कीट – साबुन घोल लगाएं", pesticide_ml: "പോളു ബീറ്റിൽ – നീം ഓയിൽ സ്പ്രേ ചെയ്യുക; സ്കെയിൽ കീടങ്ങൾ – സോപ്പ് സൊല്യൂഷൻ ഉപയോഗിക്കുക",
+  diseases_en: "Quick wilt – treat with Trichoderma; anthracnose – copper fungicide", diseases_hi: "क्विक विल्ट – ट्राइकोडर्मा से उपचार; एन्थ्राक्नोज – कॉपर फफूंदनाशक", diseases_ml: "ക്വിക്ക് വിൽറ്റ് – ട്രൈക്കോഡർമ ഉപയോഗിക്കുക; ആൻത്രാക്നോസ് – കോപ്പർ ഫംഗിസൈഡ്",
+  post_en: "Harvest spikes when berries turn red; dry in shade", post_hi: "जब बेरी लाल हो जाए तो कटाई करें; छाया में सुखाएं", post_ml: "ബെറികൾ ചുവപ്പാകുമ്പോൾ വിളവെടുപ്പ്; നിഴലിൽ ഉണക്കുക",
+  rotation_en: "Intercrop with coffee, ginger, or turmeric", rotation_hi: "कॉफी, अदरक या हल्दी के साथ अंतर्वर्तन करें", rotation_ml: "കാപ്പി, ഇഞ്ചി, മഞ്ഞൾ എന്നിവയുമായി ഇന്റർക്രോപ്പ് ചെയ്യുക",
+  notes_en: "Shade and humidity are critical for growth", notes_hi: "छाया और आर्द्रता विकास के लिए आवश्यक हैं", notes_ml: "വളർച്ചയ്ക്ക് നിഴലും ഈർപ്പവും അത്യന്താപേക്ഷിതമാണ്"
+}
+];
+
+// 🌐 UI Labels
+const advisoryLabels = {
+  en: { searchPlaceholder: "Search crop...", noMatch: "🚫 No matching crop found." },
+  hi: { searchPlaceholder: "फसल खोजें...", noMatch: "🚫 कोई मिलती-जुलती फसल नहीं मिली।" },
+  ml: { searchPlaceholder: "വിള തിരയുക...", noMatch: "🚫 യാതൊരു പൊരുത്തമുള്ള വിള കണ്ടെത്തിയില്ല." }
+};
+const fieldLabels = {
+  image: { en: "Image", hi: "छवि", ml: "ചിത്രം" },
+  crop: { en: "Crop", hi: "फसल", ml: "വിള" },
+  soil: { en: "Soil", hi: "मिट्टी", ml: "മണ്ണ്" },
+  weather: { en: "Weather", hi: "मौसम", ml: "കാലാവസ്ഥ" },
+  cultivation: { en: "Cultivation", hi: "खेती", ml: "വളർത്തൽ" },
+  fertilizer: { en: "Fertilizer", hi: "उर्वरक", ml: "വളങ്ങൾ" },
+  pesticide: { en: "Pesticide", hi: "कीटनाशक", ml: "കീടനാശിനി" },
+  diseases: { en: "Diseases", hi: "रोग", ml: "രോഗങ്ങൾ" },
+  post: { en: "Post-Harvest", hi: "कटाई के बाद", ml: "വളർത്തലിന് ശേഷം" },
+  rotation: { en: "Rotation", hi: "फसल चक्र", ml: "വളർത്തൽ ചക്രം" },
+  notes: { en: "Notes", hi: "टिप्पणियाँ", ml: "കുറിപ്പുകൾ" }
+};
+
+
+function renderAdvisoryCard(data) {
+  const lang = LANGUAGE;
+  const L = fieldLabels;
+
+  const container = document.getElementById("cropAdvisoryContainer");
+  container.innerHTML = `
+    <div class="advisory-card">
+      <h3>🌾 ${data[`crop_${lang}`]}</h3>
+      <p><strong>🧱 ${L.soil[lang]}:</strong> ${data[`soil_${lang}`]}</p>
+      <p><strong>🌦 ${L.weather[lang]}:</strong> ${data[`weather_${lang}`]}</p>
+      <p><strong>🌱 ${L.cultivation[lang]}:</strong> ${data[`cultivation_${lang}`]}</p>
+      <p><strong>🧪 ${L.fertilizer[lang]}:</strong> ${data[`fertilizer_${lang}`]}</p>
+      <p><strong>🐛 ${L.pesticide[lang]}:</strong> ${data[`pesticide_${lang}`]}</p>
+      <p><strong>🦠 ${L.diseases[lang]}:</strong> ${data[`diseases_${lang}`]}</p>
+      <p><strong>📦 ${L.post[lang]}:</strong> ${data[`post_${lang}`]}</p>
+      <p><strong>🔁 ${L.rotation[lang]}:</strong> ${data[`rotation_${lang}`]}</p>
+      <p><strong>📝 ${L.notes[lang]}:</strong> ${data[`notes_${lang}`]}</p>
+    </div>
+  `;
+}
+
+function searchAdvisory() {
+  const input = document.getElementById("cropSearchInput");
+  const query = input.value.toLowerCase().trim();
+  lastQuery = query;
+
+  const fuse = new Fuse(advisoryData, {
+    keys: ["crop_en", "crop_hi", "crop_ml"],
+    threshold: 0.4,
+    ignoreLocation: true
+  });
+
+  const results = fuse.search(query);
+  lastMatch = results.length > 0 ? results[0].item : null;
+
+  const container = document.getElementById("cropAdvisoryContainer");
+  if (lastMatch) {
+    renderAdvisoryCard(lastMatch);
+  } else {
+    container.innerHTML = `<div>${advisoryLabels[LANGUAGE].noMatch}</div>`;
+  }
+}
+
+function syncAdvisoryLanguage(lang) {
+  LANGUAGE = lang;
+  const input = document.getElementById("cropSearchInput");
+  input.placeholder = advisoryLabels[lang].searchPlaceholder;
+
+  if (lastMatch) {
+    renderAdvisoryCard(lastMatch);
+  } else if (lastQuery) {
+    searchAdvisory();
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const langSelect = document.getElementById("languageSelect");
+  const searchBtn = document.getElementById("cropSearchButton");
+  const input = document.getElementById("cropSearchInput");
+
+  if (!langSelect || !searchBtn || !input) {
+    console.error("❌ Missing required DOM elements.");
+    return;
+  }
+
+  langSelect.addEventListener("change", (e) => {
+    syncAdvisoryLanguage(e.target.value);
+  });
+
+  searchBtn.addEventListener("click", searchAdvisory);
+
+  input.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") searchAdvisory();
+  });
+
+  syncAdvisoryLanguage(LANGUAGE);
+});
+
+
+
+  </script>
+</body>
+</html>

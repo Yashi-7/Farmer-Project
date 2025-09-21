@@ -1,0 +1,697 @@
+
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+  <meta charset="UTF-8" /> 
+  <meta name="viewport" content="width=device-width, initial-scale=1" /> 
+  <title>Dynamic Video Background</title> 
+   
+  <!-- Font Awesome (for icons) --> 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/> 
+   
+  <!-- External CSS --> 
+  <link rel="stylesheet" href="style.css" /> 
+</head> 
+<body> 
+ 
+  <!-- ============================= 
+       LOGIN / REGISTER MODAL 
+    ============================== --> 
+
+<!-- 
+      <div id="auth-modal" class="modal" aria-hidden="true"     role="dialog" aria-labelledby="modal-title" aria-modal="true"> 
+        <div class="modal-content" role="document"> 
+      
+
+    < <div class="login-container" id="loginBox"> 
+      <button class="modal-close" onclick="closeModal()">✖</button> 
+    </div> 
+        <h2 id="modal-title">Login</h2>  -->
+  
+        <!-- LOGIN FORM -->
+        <!-- <form id="login-form" class="auth-form active" novalidate> 
+          <label for="login-email">Email:</label> 
+          <input type="email" id="login-email" name="login-email" required autocomplete="email" /> 
+          
+          <label for="login-password">Password:</label> 
+          <input type="password" id="login-password" name="login-password" required autocomplete="current-password" /> 
+          
+          <button type="submit" class="btn">Login</button> 
+          <p>Don't have an account?  
+            <button type="button" id="show-register" class="link-button" onclick="openModal()">Register here</button> 
+          </p> 
+        </form>  -->
+ 
+       
+ 
+      <!-- REGISTRATION FORM --> 
+      <!-- <form id="register-form" class="auth-form" novalidate> 
+        <label for="register-name">Full Name:</label> 
+        <input type="text" id="register-name" name="register-name" required autocomplete="name" /> 
+ 
+        <label for="register-farmerid">Farmer ID:</label> 
+        <input type="text" id="register-farmerid" name="register-farmerid" required /> 
+ 
+        <label for="register-phone">Phone Number:</label> 
+        <input type="tel" id="register-phone" name="register-phone" pattern="[0-9]{10}" placeholder="10-digit number" required 
+autocomplete="tel" /> 
+ 
+        <label for="register-email">Email:</label> 
+        <input type="email" id="register-email" name="register-email" required autocomplete="email" /> 
+         
+        <label for="register-password">Password:</label> 
+        <input type="password" id="register-password" name="register-password" required autocomplete="new-password" /> 
+         
+        <label for="register-password-confirm">Confirm Password:</label> 
+        <input type="password" id="register-password-confirm" name="register-password-confirm" required autocomplete="new
+password" /> 
+         
+        <button type="submit" class="btn">Register</button> 
+        <p>Already have an account?  
+          <button type="button" id="show-login" class="link-button">Login here</button> 
+        </p> 
+      </form> 
+    </div> 
+  </div> -->
+ 
+  <!-- ============================= 
+       NAVIGATION BAR 
+  ============================== --> 
+  <nav id="navbar" class="transparent" role="navigation" aria-label="Primary Navigation"> 
+    <a href="#" class="logo"> 
+      <i class="fas fa-globe-americas logo-icon" aria-hidden="true"></i> KS 
+    </a> 
+ 
+    <div class="nav-items"> 
+      <!-- Navigation links --> 
+      <a href="#heero" class="nav-item">Home</a> 
+      <a href="#feature" class="nav-item">Features</a> 
+      <a href="#chat-sec" class="nav-item">AgriBot</a> 
+      <a href="#expert-help" class="nav-item">Expert Help</a> 
+      <a href="#community" class="nav-item">Community</a> 
+      <a href="#knowledge" class="nav-item">Reviews & Tips</a> 
+      <a href="#footer" class="nav-item">Contact Us</a> 
+ 
+      <!-- Language Dropdown --> 
+      <div class="dropdown"> 
+        <button class="icon-button" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Select language"> 
+          <i class="fas fa-globe" aria-hidden="true"></i> 
+        </button> 
+        <div class="dropdown-content" role="menu"> 
+          <a href="#" role="menuitem" data-lang="en">English</a> 
+          <a href="#" role="menuitem" data-lang="hi">Hindi</a> 
+          <a href="#" role="menuitem" data-lang="ml">Malayalam</a> 
+        </div> 
+      </div> 
+ 
+      <!-- Settings Button --> 
+      <button class="icon-button" type="button" aria-label="Settings"> 
+        <i class="fas fa-cog" aria-hidden="true"></i> 
+      </button> 
+ 
+      <!-- Login Button  -->
+       <a href="http://localhost:4000/user/login" id="loginBtn" class="nav-item">Login</a> 
+         </nav>
+    </div> 
+  </nav> 
+ 
+   <!-- ============================= -->
+       <!-- HERO + VIDEO SECTION  -->
+  <!-- ============================== -->  
+  <section class="hero" aria-label="Hero section with dynamic video background" id="heero"> 
+    <!-- Video Container --> 
+    <div id="video-container" aria-label="Background videos" aria-hidden="true"> 
+       
+      <!-- Video 1 --> 
+      <div class="video-slide active"> 
+        <video autoplay muted loop playsinline> 
+          <source src="kerala.mp4" type="video/mp4" /> 
+          <!-- Fallback text for unsupported browsers --> 
+          Your browser does not support the video tag. 
+        </video> 
+        <div class="video-overlay"></div> 
+      </div> 
+ 
+      <!-- Video 2 --> 
+      <div class="video-slide"> 
+        <video autoplay muted loop playsinline> 
+          <source src="rice.mp4" type="video/mp4" /> 
+          Your browser does not support the video tag. 
+        </video> 
+        <div class="video-overlay"></div> 
+      </div> 
+ 
+      <!-- Video 3 --> 
+      <div class="video-slide"> 
+        <video autoplay muted loop playsinline> 
+          <source src="coconut.mp4" type="video/mp4" /> 
+          Your browser does not support the video tag. 
+        </video> 
+        <div class="video-overlay"></div> 
+      </div> 
+ 
+      <!-- Video 4 --> 
+      <div class="video-slide"> 
+        <video autoplay muted loop playsinline> 
+          <source src="kerala.mp4" type="video/mp4" /> 
+          Your browser does not support the video tag. 
+        </video> 
+        <div class="video-overlay"></div> 
+      </div> 
+    </div> 
+ 
+    <!-- Hero Text Content --> 
+    <div class="hero-content"> 
+      <h1>Welcome to Krishi Setu</h1> 
+      <h2>Your Agri-Tech Knowledge Partner</h2> 
+      <p> 
+        AI-powered farming solution at your fingertips. Get instant crop advice, 
+        disease detection, and weather updates in your local language. 
+      </p> 
+ 
+      <!-- CTA Buttons --> 
+      <div class="button-container"> 
+        <button class="cta-button" type="button" aria-label="Ask your question"> 
+          <i class="fa-solid fa-microphone" aria-hidden="true"></i> Ask your Question 
+        </button> 
+        <label class="cta-button" for="file-upload" tabindex="0" role="button" aria-label="Upload image"> 
+          <i class="fa-solid fa-upload" aria-hidden="true"></i> Upload Image 
+        </label> 
+        <input type="file" id="file-upload" style="display: none" aria-hidden="true" /> 
+      </div> 
+    </div> 
+  </section> 
+ 
+  <!-- ============================= 
+       FEATURES SECTION 
+  ============================== --> 
+  <section class="content-section" id="feature" aria-label="Features section"> 
+    <h2>Farming Companion for <span class="ker">Kerala</span></h2> 
+ 
+    <div class="container"> 
+      <!-- Feature 1: Crop Calendar --> 
+      <article class="card" aria-labelledby="feature1-title"> 
+        <h3 id="feature1-title"> Crop calendar</h3> 
+        <img src="crop.jpg">
+        <p>Plan sowing & harvesting with smart reminders.</p> 
+        <!-- <div class="highlight-box yellow" aria-live="polite">Wheat Market <br /><small>Last 7 days</small></div>  -->
+        <button  onclick="window.location.href='crop-calendar.html'" class="btn btn-yellow" type="button" >View calendar</button> 
+      </article> 
+ 
+      <!-- Feature 2: Pest Detection --> 
+      <article class="card" aria-labelledby="feature2-title"> 
+        <h3 id="feature2-title">   Pest detection</h3> 
+        <img src="pest.jpg">
+        <p>Early warning system for pest and disease outbreaks</p> 
+        <!-- <div class="highlight-box red" aria-live="polite"> 
+            High Risk – Brown Plant Hopper <br />   Medium Risk – Aphids 
+        </div>  -->
+        <button  onclick="window.location.href='pest-detect.html'" class="btn btn-red" type="button">View alert</button> 
+      </article> 
+ 
+      <!-- Feature 3: Weather Report --> 
+      <article class="card" aria-labelledby="feature3-title"> 
+        <h3 id="feature3-title">   Weather report</h3> 
+        <img src="weather-fore.jpg">
+        <p>Real-time weather updates and monsoon forecasts</p> 
+        <!-- <div class="highlight-box blue" aria-live="polite"> 
+               28°C <br /> Partly Cloudy – Rain expected in 2 days <br />   65% Humidity |      12 km/h Wind 
+        </div>  -->
+        <button  onclick="window.location.href='weather.html'" class="btn btn-blue" type="button">7-Day forecast</button> 
+      </article> 
+ 
+      <!-- Feature 4: Government Schemes --> 
+      <article class="card" aria-labelledby="feature4-title"> 
+        <h3 id="feature4-title">    Government Schemes</h3> 
+        <img src="scheme.jpg">
+        <p>Available government schemes and subsidies</p> 
+        <!-- <div class="highlight-box gray" aria-live="polite"> 
+          PM-KISAN – ₹6000 annual support <br /> Crop Insurance – Protect your crops 
+        </div>  -->
+        <button onclick="window.location.href='schemes.html'" class="btn btn-gray" type="button">View schemes</button> 
+      </article> 
+    </div> 
+  </section> 
+ 
+  <!-- ============================= 
+       CHAT SECTION 
+  ============================== --> 
+  <section class="chat-section" aria-label="AI chat assistant" id="chat-sec"> 
+    <h2>AI CHAT ASSISTANT</h2> 
+    <p class="subtitle">Get instant answers to your farming questions in Malayalam</p> 
+ 
+    <div class="chat-box" role="region" aria-live="polite" aria-label="Chat messages"> 
+      <div class="chat-header">         Advisory bot available 24/7</div> 
+ 
+      <!-- Chat Messages (Bot + User) --> 
+      <div class="chat-messages" tabindex="0"> 
+        <div class="message bot">          Hello! I am your farmer advisory bot.<span class="time">18:08</span></div> 
+        <div class="message bot">   You are eligible for <b>PM-KISAN subsidy</b>.<span class="time">18:08</span></div> 
+        <div class="message bot">   Your crop may have <b>Early Blight</b>.<span class="time">18:09</span></div> 
+        <div class="message bot">     <b>Coconut Mite Infestation</b>.       Spray neem-based solutions.<span 
+class="time">18:14</span></div> 
+ 
+        <div class="message user">Hello <span class="time">18:08</span></div> 
+        <div class="message user">Paddy subsidy <span class="time">18:08</span></div> 
+        <div class="message user">My tomato has yellow spots <span class="time">18:09</span></div> 
+        <div class="message user">My coconut has mite <span class="time">18:14</span></div> 
+      </div> 
+ 
+      <!-- Chat Input --> 
+      <div class="chat-input"> 
+        <input type="text" placeholder="Type your message..." aria-label="Type your message" /> 
+        <button type="button" aria-label="Send message">➤</button> 
+      </div> 
+    </div> 
+  </section> 
+ 
+  <!-- ============================= 
+       BOOK APPOINTMENT SECTION 
+  ============================== --> 
+  <!-- Expert Section with Two Cards --> 
+   
+   
+  <section class="expert-section" aria-label="Expert appointment booking" id="expert-help"> 
+    <h1 class="expert-heading">CONTACT EXPERTS</h1>
+    <div class="cards-wrapper">
+    <article class="expert-card" aria-labelledby="expert1-name"> 
+      <img src="farmer-examines-field-agronomist-farmer-examines-growth-wheat.jpg" alt="Senior Officer" class="profile-pic" /> 
+      <h3 id="expert1-name">Senior Agricultural Officer</h3> 
+      <p>Specializes in Rice & Spice cultivation</p> 
+      <div class="rating" aria-label="Rating 4.9 out of 5 stars"> 
+        <span>     </span> 
+        <span class="score">4.9/5</span> 
+      </div> 
+      <button class="book-btn">Book an appointment now</button>
+    </article> 
+ 
+    <article class="expert-card" aria-labelledby="expert2-name"> 
+      <img src="https://img.freepik.com/premium-photo/close-up-portrait-confident-indian-financial-expert-office-worker-sitting
+table-formal-suit_769609-327.jpg" alt="Soil Expert" class="profile-pic" /> 
+      <h3 id="expert2-name">Soil Health Expert</h3> 
+      <p>Specializes in Organic farming & pest management</p> 
+      <div class="rating" aria-label="Rating 4.8 out of 5 stars"> 
+        <span>     </span> 
+        <span class="score">4.8/5</span> 
+      </div> 
+      <button class="book-btn">Book an appointment now</button>
+       </article> 
+     </div>   
+  </section>  
+
+  <!-- ============================= 
+       SUCCESS STORIES SECTION 
+  ============================== --> 
+  <section class="success-stories" aria-label="Success stories from farmers" id="community"> 
+    <h2>SUCCESS STORIES</h2> 
+    <p class="subtitle">Real farmers, real success stories from across Kerala</p> 
+ 
+    <div class="stories-container"> 
+      <!-- Story Card 1 --> 
+      <article class="story-card" aria-labelledby="story1-name" aria-describedby="story1-text"> 
+        <div class="profile"> 
+          <img src="https://t4.ftcdn.net/jpg/05/20/54/19/360_F_520541964_wQvxsiVoX2or8g4D3ZyZOUTyw0wtMkd9.jpg" alt="Gopalakrishnanl"> 
+          <div><h3 id="story1-name">Gopalakrishnanl</h3><p>Rice Farmer, Palakkad</p></div> 
+        </div> 
+        <p id="story1-text" class="story-text">Using Krishi Setu, my rice cultivation increased by 40%.</p> 
+        <p class="verified">   Verified Success Story</p> 
+      </article> 
+ 
+      <!-- Story Card 2 --> 
+      <article class="story-card" aria-labelledby="story2-name" aria-describedby="story2-text"> 
+        <div class="profile"> 
+          <img src="https://plus.unsplash.com/premium_photo-1682092093534-c16eb3ea13c8?fm=jpg&q=60&w=3000&ixlib=rb
+4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" alt="Balan"> 
+          <div><h3 id="story2-name">Balan</h3><p>Spice Farmer, Wayanad</p></div> 
+        </div> 
+        <p id="story2-text" class="story-text">Krishi Setu helped identify and treat pepper diseases early.</p> 
+        <p class="verified">   Verified Success Story</p> 
+      </article> 
+ 
+      <!-- Story Card 3 --> 
+      <article class="story-card" aria-labelledby="story3-name" aria-describedby="story3-text"> 
+        <div class="profile"> 
+          <img src="indian-farmer-sugarcane-field.jpg" alt="Suresh Babu"> 
+          <div><h3 id="story3-name">Suresh Babu</h3><p>Coconut Farmer, Thrissur</p></div> 
+        </div> 
+        <p id="story3-text" class="story-text">It is very convenient to get answers in Malayalam.</p> 
+        <p class="verified">   Verified Success Story</p> 
+      </article> 
+    </div> 
+ 
+
+      <!-- Join Button -->
+  <button onclick="window.location.href='index4.html'" id="openModalBtn" class="btn" style="background-color: #e53935;">🔐 Join Community</button>
+
+  <!-- First Modal -->
+  <div id="loginModal" class="modal">
+    <div class="modal-content">
+      <h3>🔔 Join with your login credential</h3>
+      <div class="modal-actions">
+        <button id="okBtn">✅ OK</button>
+        <button id="changeBtn">🔄 Change</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Second Modal: Join Community Form -->
+  <div id="loginFormModal" class="modal">
+    <div class="modal-content">
+      <h3>🧑‍🌾 Enter Your Details to Join Community</h3>
+      <div class="login-form">
+        <input type="text" placeholder="👤 Name" />
+        <input type="tel" placeholder="📞 Phone" />
+        <input type="text" placeholder="🧾 Farmer ID" />
+        <input type="email" placeholder="📧 Email" />
+        <input type="password" placeholder="🔒 Password" />
+        <button id="joinCommunityBtn">🌱 Join Community</button>
+      </div>
+    </div>
+  </div>
+</div>
+ 
+    <!-- Stats --> 
+    <div class="stats-container" role="list" aria-label="Statistics"> 
+      <div class="stat" role="listitem"><h3 style="color: #32c23c;">25,000+</h3><p>Satisfied farmers</p></div> 
+      <div class="stat" role="listitem"><h3 style="color: #e53935;">1M+</h3><p>Solved Questions</p></div> 
+      <div class="stat" role="listitem"><h3 style="color: #2196f3;">98.5%</h3><p>Accuracy rate</p></div> 
+    </div> 
+  </section> 
+ 
+  <!-- ============================= 
+       MAIN ARTICLE & DAILY TIPS 
+  ============================== --> 
+  <section class="article-tips" aria-label="Main articles and daily tips" id="knowledge"> 
+   
+    <!-- Main Articles --> 
+    <div class="main-article"> 
+      <h2>MAIN ARTICLE</h2> 
+ 
+      <article class="article-card" aria-labelledby="article1-title"> 
+        <img src="vertical-shot-paddy-fields-daylight.jpg" alt="Rice Cultivation"> 
+        <div class="article-content"> 
+          <h3 id="article1-title">Learn methods of rice cultivation specific to Kerala.</h3> 
+          <p class="time">⏱ 8 min read</p> 
+        </div> 
+      </article> 
+ 
+      <article class="article-card" aria-labelledby="article2-title"> 
+        <img src="black-pepper.jpg" alt="Black"> 
+         <div class="article-content"> 
+          <h3>Guide to prevent and treat diseases in black pepper.</h3> 
+          <p class="time">⏱ 12 min read</p> 
+        </div> 
+      </div> 
+    </div> 
+ 
+    <!-- Daily Tips --> 
+    <div class="daily-tips"> 
+      <h2>DAILY TIPS</h2> 
+      <div class="tip-card green"><h4>   Daily tips</h4><p>Ensure good drainage during monsoon</p></div> 
+      <div class="tip-card orange"><h4>    Weather warning</h4><p>Heavy rain expected for 3 days</p></div> 
+    </div> 
+    </div>
+  </section> 
+ 
+  <!-- ============================= 
+       APP PROMO SECTION 
+  ============================== --> 
+  <section class="app-promo"> 
+    <div class="promo-text"> 
+      <h3>Get instant access to farming advice even without internet connection</h3> 
+      <ul> 
+        <li><b>Internet:</b> Can be used without internet</li> 
+        <li><b>Voice Command:</b> Speak in Malayalam</li> 
+        <li><b>Smart Alert:</b> Weather & Agriculture Alerts</li> 
+      </ul> 
+      <div class="app-buttons"> 
+        <a> <i class="fa-brands fa-app-store"></i> </a>
+        <a><i class="fa-brands fa-google-play"></i></a>
+      </div> 
+    </div> 
+    <div class="promo-img"> 
+      <img src="farmer-holding-phone.jpg" alt="Farmer holding phone"> 
+    </div> 
+  </section> 
+ 
+  <!-- ============================= 
+       FOOTER SECTION 
+  ============================== --> 
+  <footer class="footer" id="footer"> 
+    <div class="footer-container"> 
+ 
+      <!-- About --> 
+      <div class="footer-about"> 
+        <img src="logo.png" alt="Krishi Setu Logo" class="footer-logo"> 
+        <p>kerala Agricultural Advisory</p> 
+        <p class="footer-text">Empowering Kerala farmers with AI-powered advisory services</p> 
+        <div class="social-icons"> 
+          <a href="#"><i class="fab fa-facebook"></i></a> 
+          <a href="#"><i class="fab fa-instagram"></i></a> 
+          <a href="#"><i class="fab fa-twitter"></i></a> 
+        </div> 
+      </div> 
+ 
+      <!-- Links --> 
+      <div class="footer-links"> 
+        <h4>Links</h4> 
+        <ul> 
+          <li><a href="#heero">Home</a></li> 
+          <li><a href="#feautre">Features</a></li> 
+          <li><a href="#chat-sec">Chat Assistant</a></li> 
+          <li><a href="#expert-help">Expert help</a></li> 
+          <li><a href="#community">Community</a></li> 
+          <li><a href="#knowledge">Knowledge Center</a></li> 
+        </ul> 
+      </div> 
+ 
+      <!-- Services --> 
+      <div class="footer-services"> 
+        <h4>Services</h4> 
+        <ul> 
+          <li>Crop disease diagnosis</li> 
+          <li>Weather Forecast</li> 
+          <li>Pest Control</li> 
+          <li>Soil analysis</li> 
+          <li>Government schemes</li> 
+        </ul> 
+      </div> 
+ 
+      <!-- Contact --> 
+      <div class="footer-contact"> 
+        <h4>Get in touch</h4> 
+        <p>   Helpline: 1800-xxxx-xxx</p> 
+        <p>        Email: help@krishisetu.kerala.gov.in</p> 
+        <p>        Help hours: Available 24/7</p> 
+      </div> 
+    </div> 
+ 
+    <!-- Bottom --> 
+    <div class="footer-bottom"> 
+      <p>2025 Krishi Setu Kerala. All rights reserved. | Government of Kerala</p> 
+      <div class="footer-policy"> 
+        <a href="#">Privacy Policy</a> | <a href="#">Conditions</a> 
+      </div> 
+    </div> 
+  </footer>
+
+
+  <!-- <div id="auth-modal" class="modal hidden">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeModal()">✖</button> -->
+
+    <!-- LOGIN FORM -->
+    <!-- <form id="login-form" class="auth-form active">
+      <h2>Login</h2>
+      <label>Email:</label>
+      <input type="email" id="login-email" name="email" required>
+      
+      <label>Password:</label>
+      <input type="password" id="login-password" name="password" required>
+      
+      <button type="submit" class="btn">Login</button>
+      <p>Don't have an account?
+        <button type="button" onclick="showRegister()" class="link-button">Register here</button>
+      </p>
+    </form> -->
+
+    <!-- REGISTER FORM -->
+    <!-- <form id="register-form" class="auth-form hidden">
+      <h2>Register</h2>
+      <input type="text" id="register-name" name="name" placeholder="Full Name" required>
+      <input type="tel" id="register-phone" name="phone" placeholder="Phone" required>
+      <input type="email" id="register-email" name="email" placeholder="Email" required>
+      <input type="password" id="register-password" name="password" placeholder="Password" required>
+      <button type="submit" class="btn"> Register</button>
+      <p>Already have an account?
+        <button type="button" onclick="showLogin()" class="link-button">Login here</button>
+      </p>
+    </form>
+  </div>
+</div>
+
+<script>
+let LANGUAGE = "en"; -->
+
+<!-- const translationsHeader = {
+  en: { title: "🌾 Farmer Help Data", languageLabel: "🌐 Select Language:" },
+  hi: { title: "🌾 किसान सहायता डेटा", languageLabel: "🌐 भाषा चुनें:" },
+  ml: { title: "🌾 കർഷക സഹായ ഡാറ്റ", languageLabel: "🌐 ഭാഷ തിരഞ്ഞെടുക്കുക:" }
+};
+const translationsCrop = { en: "Crop Calendar", hi: "फसल कैलेंडर", ml: "വിള കാൽണ്ടർ" };
+const translationsWeather = { en: "Weather Forecast", hi: "मौसम पूर्वानुमान", ml: "കാലാവസ്ഥ പ്രവചനം" };
+
+function updateAllLabels() {
+  const header = translationsHeader[LANGUAGE] || translationsHeader["en"];
+  document.getElementById("farmerTitle").innerText = header.title;
+  document.getElementById("languageLabel").innerText = header.languageLabel;
+  const cropHeading = document.getElementById("cropHeading");
+  if(cropHeading) cropHeading.innerText = translationsCrop[LANGUAGE] || translationsCrop["en"];
+  const weatherHeading = document.getElementById("weatherHeading");
+  if(weatherHeading) weatherHeading.innerText = translationsWeather[LANGUAGE] || translationsWeather["en"];
+}
+
+// Attach event to all dropdown links
+document.querySelectorAll(".dropdown-content a").forEach(link => {
+  link.addEventListener("click", (e) => {
+    e.preventDefault();
+    LANGUAGE = link.getAttribute("data-lang");
+    updateAllLabels();
+  }); -->
+<!-- });
+
+// Initial render
+updateAllLabels();
+</script> -->
+
+
+  <!-- ============================= 
+       JAVASCRIPT 
+  ============================== --> 
+
+
+
+<script>
+
+// Modal control
+// function openModal() {
+//   document.getElementById("auth-modal").classList.remove("hidden");
+// }
+// function closeModal() {
+//   document.getElementById("auth-modal").classList.add("hidden");
+// }
+
+// // Switch between login/register
+// function showRegister() {
+//   document.getElementById("login-form").classList.add("hidden");
+//   document.getElementById("register-form").classList.remove("hidden");
+// }
+// function showLogin() {
+//   document.getElementById("register-form").classList.add("hidden");
+//   document.getElementById("login-form").classList.remove("hidden");
+// }
+
+
+
+// Handle Login Form
+// document.getElementById("login-form")?.addEventListener("submit", async function (e) {
+//   e.preventDefault();
+
+//   const email = document.getElementById("login-email").value;
+//   const password = document.getElementById("login-password").value;
+
+//   try {
+//     const res = await fetch("http://localhost:3000/users/login", {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify({ email, password })
+//     });
+
+//     const data = await res.json();
+//     if (res.ok) {
+//       alert("✅ Login successful!");
+//       console.log(data);
+      // you can save token if needed:
+      // localStorage.setItem("token", data.token);
+//     } else {
+//       alert("❌ " + data.message || "Login failed");
+//     }
+//   } catch (err) {
+//     console.error(err);
+//     alert("⚠️ Error logging in");
+//   }
+// });
+
+
+// Handle Register Form
+// document.getElementById("register-form")?.addEventListener("submit", async function (e) {
+//   e.preventDefault();
+
+//   const fullname = {
+//     firstname: document.getElementById("register-name").value.split(" ")[0],
+//     lastname: document.getElementById("register-name").value.split(" ")[1] || ""
+//   };
+//   const email = document.getElementById("register-email").value;
+//   const password = document.getElementById("register-password").value;
+
+//   try {
+//     const res = await fetch("http://localhost:3000/users/register", {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify({ fullname, email, password })
+//     });
+
+//     const data = await res.json();
+//     if (res.ok) {
+//       alert("✅ Registration successful!");
+//       console.log(data);
+//     } else {
+//       alert("❌ " + data.errors?.[0]?.msg || data.message || "Registration failed");
+//     }
+//   } catch (err) {
+//     console.error(err);
+//     alert("⚠️ Error registering");
+//   }
+// });
+
+// ===========================
+// Success Stories Join Button
+// ===========================
+const loginModal = document.getElementById("loginModal");
+    const loginFormModal = document.getElementById("loginFormModal");
+
+    document.getElementById("openModalBtn").addEventListener("click", () => {
+      loginModal.style.display = "block";
+    });
+
+    document.getElementById("okBtn").addEventListener("click", () => {
+      loginModal.style.display = "none";
+      window.location.href = "index2.html"; // ✅ Redirect to second page
+    });
+
+    document.getElementById("changeBtn").addEventListener("click", () => {
+      loginModal.style.display = "none";
+      loginFormModal.style.display = "block";
+    });
+
+    document.getElementById("joinCommunityBtn").addEventListener("click", () => {
+      loginFormModal.style.display = "none";
+      window.location.href = "index2.html"; // ✅ Redirect to second page
+    });
+
+    window.onclick = function(event) {
+      if (event.target === loginModal) loginModal.style.display = "none";
+      if (event.target === loginFormModal) loginFormModal.style.display = "none";
+    };
+// </script> 
+
+
+
+
+  <script src="script.js"></script> 
+
+
+</body> 
+</html> 
+ 
+

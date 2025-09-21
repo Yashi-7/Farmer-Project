@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🧪 Plant Health Diagnosis</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #F1FAF0;
+      color: #333;
+    }
+    h1 {
+      color: #2e7d32;
+    }
+    #image-preview img, .diagnosis-block img {
+      max-width: 300px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .diagnosis-block {
+      background: #fff;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    #footerText {
+      margin-top: 40px;
+      font-size: 0.9em;
+      color: #666;
+      text-align: center;
+    }
+    select, input[type="file"] {
+      margin-top: 10px;
+      padding: 5px;
+      font-size: 0.95em;
+    }
+  h1{
+    text-align: center;
+    margin-top: 50px;
+  }
+  
+  .lang{
+    margin-right: 10px;
+
+  }
+
+  
+   
+  .center-container {
+  display: flex;
+  padding: 40px;
+ box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  margin: 40px;
+  flex-direction: column; /* stack elements vertically */
+  align-items: center;    /* center horizontally */
+  justify-content: flex-start;
+  max-width: 800px;
+  background-color: #F5F5DC; /* light beige background */
+  border: 1px solid #ccc; /* optional border */
+  gap: 20px;              /* space between elements */
+  margin-top: 30px;       /* optional spacing from top */
+  text-align: center;     /* center labels and text */
+ margin-left: 300px;
+}
+ 
+/* .lang{
+  font-weight: bold;
+  color: #3e2723;
+} */
+
+/* .lab{
+  font-weight: bold;
+} */
+
+/* Label styling */
+.lab, .lang label {
+  font-weight: bold;
+  color: #3e2723;
+  margin-right: 5px;
+}
+
+/* label{
+  border: 1px solid transparent;
+  border-radius: 25px;
+} */
+  /* .navv{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    width: 100%;
+    align-items: center;
+    border-radius: 20px;
+     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 15px;
+    width: 650px;
+    background-color: rgba(46, 125, 50,0.3);
+  } */ 
+
+
+  .navv {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 25px;
+  flex-wrap: wrap; /* makes it responsive */
+  width: 100%;
+  padding: 15px;
+  border-radius: 12px;
+  background-color: rgba(46, 125, 50, 0.15);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+  </style>
+</head>
+<body>
+
+  <h1 id="diagnosisTitle">🧪 PLANT HEALTH DIAGNOSIS</h1>
+
+<div class="center-container">
+
+  <!-- Upload + Language bar -->
+  <div class="navv">
+    <div class="upload">
+      <label id="uploadLabel" for="imageUpload" class="lab">📤 Upload Image:</label>
+      <input type="file" id="imageUpload" accept="image/*" />
+    </div>
+
+    <div class="lang">
+      <label for="languageSelect">🌐 Language:</label>
+      <select id="languageSelect">
+        <option value="en">English</option>
+        <option value="hi">हिन्दी</option>
+        <option value="ml">മലയാളം</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div id="image-info"></div>
+  <div id="image-preview"></div>
+  <div id="label-container" class="diagnosis-block"></div>
+
+  <!-- Footer -->
+  <div id="footerText">
+    🌱 Powered by Teachable Machine & Kerala Agricultural Guidelines
+  </div>
+</div>
+
+  
+  <!-- <h1 id="diagnosisTitle">🧪 PLANT HEALTH DIAGNOSIS</h1>
+  <div class="center-container">
+     <div class="navv">
+    <div class="upload">
+  <label id="uploadLabel" for="imageUpload" class="lab">📤 Upload Image:</label>
+  <input type="file" id="imageUpload" accept="image/*"  />
+   </div>
+
+  <div class="lang"> 
+    <label for="languageSelect" >🌐 Language:</label>
+    <select id="languageSelect">
+      <option value="en">English</option>
+      <option value="hi">हिन्दी</option>
+      <option value="ml">മലയാളം</option>
+    </select>
+  </div>
+</div>
+  <div id="image-info"></div>
+  <div id="image-preview"></div>
+
+  <div id="label-container" class="diagnosis-block"></div>
+
+  <div id="footerText">🌱 Powered by Teachable Machine & Kerala Agricultural Guidelines</div>
+  </div> -->
+
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+  <!-- Diagnosis Script -->
+  <script>
+   let LANGUAGE = "en";
+    const MODEL_URL = "https://teachablemachine.withgoogle.com/models/35xEdOuZ8/";
+    const CONFIDENCE_THRESHOLD = 0.75;
+
+    let model, labelContainer, maxPredictions;
+    let lastPrediction = null;
+
+    const translationsDiagnosis = {
+      en: {
+        title: "🧪 Plant Health Diagnosis",
+        uploadLabel: "📤 Upload Image:",
+        confidence: "Confidence",
+        diagnosis: "Diagnosis",
+        solution: "Solution",
+        noImage: "Please select an image.",
+        unclear: "Please try a clearer photo.",
+        footer: "🌱 Powered by Teachable Machine & Kerala Agricultural Guidelines"
+
+
+ 
+
+      },
+      hi: {
+        title: "🧪 पौधे का स्वास्थ्य निदान",
+        uploadLabel: "📤 छवि अपलोड करें:",
+        confidence: "विश्वास स्तर",
+        diagnosis: "निदान",
+        solution: "समाधान",
+        noImage: "कृपया एक छवि चुनें।",
+        unclear: "कृपया स्पष्ट छवि अपलोड करें।",
+        footer: "🌱 टीचेबल मशीन और केरल कृषि दिशानिर्देश द्वारा संचालित"
+
+      },
+      ml: {
+        title: "🧪 ചെടിയുടെ ആരോഗ്യനിർണ്ണയം",
+        uploadLabel: "📤 ചിത്രം അപ്‌ലോഡ് ചെയ്യുക:",
+        confidence: "വിശ്വാസം",
+        diagnosis: "നിരീക്ഷണം",
+        solution: "പരിഹാരം",
+        noImage: "ദയവായി ഒരു ചിത്രം തിരഞ്ഞെടുക്കുക.",
+        unclear: "വ്യക്തമായ ചിത്രം അപ്‌ലോഡ് ചെയ്യുക.",
+        footer: "🌱 ടീച്ചബിൾ മെഷീനും കേരള കാർഷിക മാർഗനിർദ്ദേശങ്ങളും ചേർന്ന് പ്രവർത്തിക്കുന്നു"
+
+      }
+    };
+
+    const advisoryMap = {
+  "Class 1": {
+    label: {
+      en: "Yellow Leaf",
+      hi: "पीला पत्ता",
+      ml: "മഞ്ഞ ഇല"
+    },
+    solution: {
+      en: `🪴 Organic Methods:
+- Use compost tea to enrich soil nutrients.
+- Apply banana peel water for potassium boost.
+- Spray diluted seaweed extract to improve leaf health.
+- Ensure proper sunlight and avoid overwatering.
+
+🧪 Non-Organic Methods:
+- Use balanced NPK fertilizers (e.g., 20-20-20).
+- Apply iron or magnesium supplements if deficiency is suspected.
+- Use commercial foliar sprays for quick nutrient absorption.`,
+
+      hi: `🪴 जैविक विधियाँ:
+- कम्पोस्ट चाय का उपयोग करें ताकि मिट्टी में पोषक तत्व बढ़ें।
+- केले के छिलके का पानी पोटैशियम के लिए उपयोग करें।
+- समुद्री शैवाल अर्क का छिड़काव करें।
+- पर्याप्त धूप दें और अधिक पानी से बचें।
+
+🧪 रासायनिक विधियाँ:
+- संतुलित एनपीके उर्वरक (जैसे 20-20-20) का प्रयोग करें।
+- यदि कमी हो तो आयरन या मैग्नीशियम सप्लीमेंट दें।
+- त्वरित पोषण के लिए फोलियर स्प्रे का उपयोग करें।`,
+
+      ml: `🪴 ഓർഗാനിക് മാർഗങ്ങൾ:
+- മണ്ണിലെ പോഷകങ്ങൾ വർദ്ധിപ്പിക്കാൻ കോമ്പോസ്റ്റ് ടീ ഉപയോഗിക്കുക.
+- പൊട്ടാസ്യം വർദ്ധിപ്പിക്കാൻ വാഴപ്പഴം തൊലി വെള്ളം ഉപയോഗിക്കുക.
+- ഇലയുടെ ആരോഗ്യത്തിന് കടൽച്ചെടി എക്സ്ട്രാക്റ്റ് സ്പ്രേ ചെയ്യുക.
+- മതിയായ സൂര്യപ്രകാശം നൽകുക, അധിക ജലസേചനം ഒഴിവാക്കുക.
+
+🧪 രാസമാർഗങ്ങൾ:
+- ബാലൻസ്ഡ് NPK ഫർട്ടിലൈസർ (ഉദാ: 20-20-20) ഉപയോഗിക്കുക.
+- കുറവുണ്ടെങ്കിൽ ഇരുമ്പ് അല്ലെങ്കിൽ മഗ്നീഷ്യം സപ്ലിമെന്റുകൾ നൽകുക.
+- വേഗത്തിൽ പോഷകങ്ങൾ ലഭിക്കാൻ ഫോളിയർ സ്പ്രേ ഉപയോഗിക്കുക.`
+    },
+    images: [
+      "assets/yellow.jpg",
+      "assets/WhatsApp Image 2025-09-12 at 00.53.31_ef146f3e.jpg"
+  ],imageTitles: {
+    en: ["Kerala Affected Region", "Chance of Recovery"],
+    hi: ["केरल प्रभावित क्षेत्र", "पुनर्प्राप्ति की संभावना"],
+    ml: ["കേരളം ബാധിച്ച പ്രദേശം", "പുനരധിവാസ സാധ്യത"]
+  }
+
+
+  },
+
+  "Class 2": {
+    label: {
+      en: "No Disease",
+      hi: "कोई रोग नहीं",
+      ml: "രോഗമില്ല"
+    },
+    solution: {
+      en: `✅ Your plant is healthy!
+- Continue regular watering and sunlight.
+- Use compost or organic mulch to maintain soil health.
+- Monitor occasionally for pests or discoloration.`,
+
+      hi: `✅ आपका पौधा स्वस्थ है!
+- नियमित रूप से पानी और धूप देना जारी रखें।
+- मिट्टी की गुणवत्ता बनाए रखने के लिए कम्पोस्ट या जैविक मल्च का उपयोग करें।
+- समय-समय पर कीट या रंग परिवर्तन की जांच करें।`,
+
+      ml: `✅ നിങ്ങളുടെ ചെടി ആരോഗ്യവാനാണ്!
+- പതിവായി ജലസേചനം ചെയ്യുക, മതിയായ സൂര്യപ്രകാശം നൽകുക.
+- മണ്ണിന്റെ ആരോഗ്യത്തിന് കോമ്പോസ്റ്റ് അല്ലെങ്കിൽ ഓർഗാനിക് മൾച്ച് ഉപയോഗിക്കുക.
+- കീടങ്ങൾക്കും ഇലകളിലെ മാറ്റങ്ങൾക്കും നിരീക്ഷണം തുടരുക.`
+    },
+   
+      
+  
+  },
+
+  "Class 3": {
+    label: {
+      en: "Rust Leaf",
+      hi: "जंग लगे पत्ते",
+      ml: "റസ്റ്റ് ഇല"
+    },
+    solution: {
+      en: `🪴 Organic Methods:
+- Remove affected leaves and dispose of them safely.
+- Improve air circulation around the plant to reduce humidity.
+- Spray neem oil weekly to suppress fungal growth.
+- Use baking soda solution (1 tsp baking soda + 1 liter water) to neutralize spores.
+- Apply compost tea or seaweed extract to boost plant immunity.
+
+🧪 Non-Organic Methods:
+- Use copper-based fungicides like copper oxychloride or Bordeaux mixture.
+- Apply systemic fungicides containing myclobutanil or chlorothalonil (follow label instructions).
+- Avoid overhead watering to prevent moisture buildup.
+- Use protective gloves and mask while applying chemical treatments.`,
+
+      hi: `🪴 जैविक विधियाँ:
+- प्रभावित पत्तों को हटाकर सुरक्षित रूप से नष्ट करें।
+- पौधे के चारों ओर हवा का प्रवाह बढ़ाएं ताकि नमी कम हो।
+- नीम तेल का साप्ताहिक छिड़काव करें।
+- बेकिंग सोडा घोल (1 चम्मच बेकिंग सोडा + 1 लीटर पानी) का उपयोग करें।
+- पौधे की प्रतिरक्षा बढ़ाने के लिए कम्पोस्ट चाय या समुद्री शैवाल अर्क का प्रयोग करें।
+
+🧪 रासायनिक विधियाँ:
+- कॉपर ऑक्सीक्लोराइड या बोर्डो मिश्रण जैसे तांबे-आधारित फफूंदनाशकों का प्रयोग करें।
+- माइक्लोब्यूटानिल या क्लोरोथालोनिल युक्त प्रणालीगत फफूंदनाशकों का प्रयोग करें (निर्देशों का पालन करें)।
+- नमी से बचने के लिए ऊपर से पानी देने से बचें।
+- रासायनिक उपचार करते समय दस्ताने और मास्क पहनें।`,
+
+      ml: `🪴 ഓർഗാനിക് മാർഗങ്ങൾ:
+- ബാധിച്ച ഇലകൾ നീക്കംചെയ്ത് സുരക്ഷിതമായി നശിപ്പിക്കുക.
+- ചെടിയുടെ ചുറ്റും വായു പ്രവാഹം മെച്ചപ്പെടുത്തുക.
+- നീം ഓയിൽ ആഴ്ചതോറും സ്പ്രേ ചെയ്യുക.
+- ബേക്കിംഗ് സോഡാ ദ്രാവകം (1 ടീസ്പൂൺ + 1 ലിറ്റർ വെള്ളം) ഉപയോഗിക്കുക.
+- ചെടിയുടെ പ്രതിരോധശേഷി വർദ്ധിപ്പിക്കാൻ കോമ്പോസ്റ്റ് ടീ അല്ലെങ്കിൽ കടൽച്ചെടി എക്സ്ട്രാക്റ്റ് ഉപയോഗിക്കുക.
+
+🧪 രാസമാർഗങ്ങൾ:
+- കോപ്പർ ഓക്സിക്ലോറൈഡ് അല്ലെങ്കിൽ ബോർഡോ മിശ്രിതം പോലുള്ള കോപ്പർ അടിസ്ഥാനമാക്കിയ ഫംഗിസൈഡുകൾ ഉപയോഗിക്കുക.
+- മൈക്ലോബ്യൂട്ടാനിൽ അല്ലെങ്കിൽ ക്ലോറോതാലോണിൽ അടങ്ങിയ സിസ്റ്റമിക് ഫംഗിസൈഡുകൾ ഉപയോഗിക്കുക (ലേബൽ നിർദ്ദേശങ്ങൾ പാലിക്കുക).
+- ഈർപ്പം ഒഴിവാക്കാൻ മേൽവെള്ളം ഒഴിക്കുന്നത് ഒഴിവാക്കുക.
+- രാസ ചികിത്സയ്ക്കിടെ ഗ്ലൗസും മാസ്കും ധരിക്കുക.`
+    },
+    images: [
+      "assets/rust.jpg",
+      "assets/WhatsApp Image 2025-09-12 at 00.53.31_a9b5e5d9.jpg"
+  ],imageTitles: {
+    en: ["Kerala Affected Region", "Chance of Recovery"],
+    hi: ["केरल प्रभावित क्षेत्र", "पुनर्प्राप्ति की संभावना"],
+    ml: ["കേരളം ബാധിച്ച പ്രദേശം", "പുനരധിവാസ സാധ്യത"]
+  }
+
+  },
+
+  "Class 4": {
+    label: {
+      en: "Whitefly Problem",
+      hi: "श्वेत मक्खी समस्या",
+      ml: "വൈറ്റ്ഫ്ലൈ പ്രശ്നം"
+    },
+    solution: {
+      en: `🪴 Organic Methods:
+- Spray water to dislodge whiteflies.
+- Clean leaves regularly to remove eggs.
+- Introduce natural predators like ladybugs.
+- Use neem oil or insecticidal soap weekly.
+
+🧪 Non-Organic Methods:
+- Apply chemical insecticides like imidacloprid or pyrethroids (use with caution).
+- Use yellow sticky traps to monitor and reduce population.
+- Avoid over-fertilizing, which attracts whiteflies.
+- Rotate treatments to prevent resistance buildup.`,
+
+      hi: `🪴 जैविक विधियाँ:
+- सफेद मक्खियों को हटाने के लिए पानी छिड़कें।
+- अंडों को हटाने के लिए पत्तों को नियमित रूप से साफ करें।
+- लेडीबग्स जैसे प्राकृतिक शिकारी को आकर्षित करें।
+- नीम तेल या कीटनाशक साबुन का साप्ताहिक उपयोग करें।
+
+🧪 रासायनिक विधियाँ:
+- इमिडाक्लोप्रिड या पाइरेथ्रॉइड जैसे रासायनिक कीटनाशकों का प्रयोग करें (सावधानी से उपयोग करें)।
+- पीले स्टिकी ट्रैप का उपयोग करें ताकि संख्या कम हो।
+- अधिक उर्वरक देने से बचें, जिससे सफेद मक्खियाँ आकर्षित होती हैं।
+- प्रतिरोध से बचने के लिए उपचारों को बदलते रहें।`,
+
+      ml: `🪴 ഓർഗാനിക് മാർഗങ്ങൾ:
+- വൈറ്റ്ഫ്ലൈ നീക്കംചെയ്യാൻ വെള്ളം സ്പ്രേ ചെയ്യുക.
+- ഇലകൾ ശുചിയാക്കി മുട്ടകൾ നീക്കംചെയ്യുക.
+- ലേഡിബഗുകൾ പോലുള്ള പ്രകൃതിദത്ത ശത്രുക്കളെ ആകർഷിക്കുക.
+- നീം ഓയിൽ അല്ലെങ്കിൽ ഇൻസെക്ടിസൈഡൽ സോപ്പ് ആഴ്ചതോറും ഉപയോഗിക്കുക.
+
+🧪 രാസമാർഗങ്ങൾ:
+- ഇമിഡാക്ലോപ്രിഡ് അല്ലെങ്കിൽ പൈറെത്രോയിഡ് പോലുള്ള രാസ കീടനാശിനികൾ ഉപയോഗിക്കുക (ശ്രദ്ധയോടെ).
+- വൈറ്റ്ഫ്ലൈ നിരീക്ഷിക്കാൻ മഞ്ഞ സ്റ്റിക്കി ട്രാപ്പുകൾ ഉപയോഗിക്കുക.
+- വൈറ്റ്ഫ്ലൈ ആകർഷിക്കാൻ സാധ്യതയുള്ള അധിക ഫർട്ടിലൈസർ ഒഴിവാക്കുക.
+- പ്രതിരോധം ഒഴിവാക്കാൻ ചികിത്സകൾ മാറി മാറി ഉപയോഗിക്കുക.`
+    },
+    images: [
+      "assets/whitefly.jpg",
+      "assets/WhatsApp Image 2025-09-12 at 00.53.31_be06626e.jpg"
+  ],imageTitles: {
+    en: ["Kerala Affected Region", "Chance of Recovery"],
+    hi: ["केरल प्रभावित क्षेत्र", "पुनर्प्राप्ति की संभावना"],
+    ml: ["കേരളം ബാധിച്ച പ്രദേശം", "പുനരധിവാസ സാധ്യത"]
+  }
+
+  }
+};
+   
+
+    async function init() {
+      const modelURL = MODEL_URL + "model.json";
+      const metadataURL = MODEL_URL + "metadata.json";
+      model = await tmImage.load(modelURL, metadataURL);
+      maxPredictions = model.getTotalClasses();
+      labelContainer = document.getElementById("label-container");
+      document.getElementById("imageUpload").addEventListener("change", handleImageUpload);
+      
+
+    }
+
+    async function handleImageUpload(event) {
+      const file = event.target.files[0];
+      if (!file) {
+        const t = translationsDiagnosis[LANGUAGE];
+        labelContainer.innerHTML = `<div><strong>⚠ ${t.noImage}</strong></div>`;
+        return;
+      }
+
+      const img = document.createElement("img");
+      img.src = URL.createObjectURL(file);
+      img.onload = async () => {
+        document.getElementById("image-preview").innerHTML = "";
+        document.getElementById("image-preview").appendChild(img);
+        document.getElementById("image-info").innerHTML =` 📷 <strong>Image:</strong> ${file.name}`;
+        await predict(img);
+      };
+    }
+
+    async function predict(imageElement) {
+      const prediction = await model.predict(imageElement);
+      // Adjust probabilities: reduce by 0.1 if greater than 0.9
+  const adjusted = prediction.map(p => {
+    const adjustedProb = p.probability > 0.9 ? p.probability - 0.1 : p.probability;
+    return { ...p, probability: adjustedProb };
+  });
+
+
+      const filtered = prediction.filter(p => p.probability >= CONFIDENCE_THRESHOLD);
+      lastPrediction = filtered.length > 0 ? filtered : null;
+      renderDiagnosis(lastPrediction);
+    }
+
+    function renderDiagnosis(predictions) {
+      const t = translationsDiagnosis[LANGUAGE];
+      labelContainer.innerHTML = "";
+
+      if (!predictions || predictions.length === 0) {
+        labelContainer.innerHTML = `<div><strong>🤔 ${t.unclear}</strong></div>` ;
+        return;
+      }
+
+    predictions.forEach(p => {
+        const advisory = advisoryMap[p.className];
+        if (!advisory) return;
+
+        const label = advisory.label?.[LANGUAGE] || advisory.label.en;
+        const solution = advisory.solution?.[LANGUAGE] || advisory.solution.en;
+        const titles = advisory.imageTitles?.[LANGUAGE] || advisory.imageTitles?.en || [];
+
+        const block = document.createElement("div");
+        block.innerHTML = `
+          <strong>${t.confidence}:</strong> ${(p.probability * 100).toFixed(2)}%<br>
+          <strong>${t.diagnosis}:</strong> ${label}<br>
+          <strong>${t.solution}:</strong> ${solution.replace(/\n/g, "<br>")}
+        `;
+
+        advisory.images.forEach((url, index) => {
+          const refImg = document.createElement("img");
+          refImg.src = url;
+          refImg.alt = titles[index] || "Reference Image";
+
+          const caption = document.createElement("div");
+          caption.innerText = titles[index] || "";
+
+          block.appendChild(refImg);
+          block.appendChild(caption);
+        });
+
+        labelContainer.appendChild(block);
+      });
+    }
+
+
+     function updateDiagnosisLabels() {
+      const t = translationsDiagnosis[LANGUAGE];
+      document.getElementById("diagnosisTitle").innerText = t.title;
+      document.getElementById("uploadLabel").childNodes[0].nodeValue = t.uploadLabel + " ";
+      document.getElementById("footerText").innerText = t.footer;
+    }
+
+    document.getElementById("languageSelect").addEventListener("change", (e) => {
+      LANGUAGE = e.target.value;
+      updateDiagnosisLabels();
+      renderDiagnosis(lastPrediction);
+    });
+     
+
+    window.onload = () => {
+      updateDiagnosisLabels();
+      init();
+    };
+  </script>
+</body>
+</html>

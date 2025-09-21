@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Farmer Community Feed</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding-bottom: 100px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 20px;
+      background: #fff;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+
+    .top-bar button {
+      background-color: #1565c0;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .top-bar button.exit {
+      background-color: #d32f2f;
+    }
+
+    .header {
+      padding: 12px 16px;
+      background: #fff;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .search-bar {
+      background: #eee;
+      padding: 8px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .filters {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+    }
+
+    .filter-pills {
+      display: flex;
+      gap: 8px;
+    }
+
+    .pill {
+      padding: 6px 12px;
+      background: #eee;
+      border-radius: 20px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .pill.active {
+      background: #ffeb3b;
+      font-weight: bold;
+    }
+
+    .change-link {
+      color: #1565c0;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      padding: 20px 16px;
+    }
+
+    .feed-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .feed-header {
+      padding: 12px 16px;
+      font-size: 14px;
+      color: #555;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .feed-image {
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+    }
+
+    .feed-body {
+      padding: 16px;
+      font-size: 15px;
+      color: #333;
+      line-height: 1.5;
+    }
+
+    .highlight {
+      background: #fff9c4;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: bold;
+      color: #d32f2f;
+    }
+
+    .feed-actions {
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      border-top: 1px solid #eee;
+      font-size: 14px;
+      color: #1565c0;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .feed-actions div.active {
+      color: #d32f2f;
+    }
+
+    .feed-actions div:hover {
+      text-decoration: underline;
+    }
+
+    .treatment-btn {
+      display: block;
+      margin: 10px auto 16px;
+      background: #2e7d32;
+      color: white;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .comment-box {
+      display: none;
+      padding: 10px 16px;
+    }
+
+    .comment-box input {
+      width: 100%;
+      padding: 8px;
+      font-size: 14px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    .ask-button {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      background: #1565c0;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 30px;
+      font-weight: bold;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      cursor: pointer;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #fff;
+      border-top: 1px solid #ddd;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      font-size: 13px;
+      color: #666;
+    }
+
+    .bottom-nav div.active {
+      color: #673ab7;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Buttons -->
+  <div class="top-bar">
+    <button onclick="addPost()">➕ Add Post</button>
+    <button onclick="showAlert()">🔔 Alert</button>
+    <button class="exit" onclick="window.location.href='index.html'">🚪 Exit</button>
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="search-bar">🔍 Search in Community</div>
+    <div class="filters">
+      <div class="filter-pills">
+        <div class="pill active" onclick="filterPosts('banana')">🍌 Banana</div>
+        <div class="pill" onclick="filterPosts('bean')">🌱 Bean</div>
+        <div class="pill" onclick="filterPosts('tomato')">🍅 Tomato</div>
+      </div>
+      <div class="change-link">Change</div>
+    </div>
+  </div>
+
+  <!-- Feed Container -->
+  <div class="container" id="feedContainer"></div>
+
+  <!-- Floating Ask Button -->
+  <div class="ask-button">✏ Ask Community</div>
+
+  <!-- Bottom Navigation -->
+  <div class="bottom-nav">
+    <div>🌿 Your crops</div>
+    <div class="active">👥 Community</div>
+    <div>🛒 Market</div>
+    <div>👤 You</div>
+  </div>
+
+  <script>
+    const posts = [
+      {
+        user: "Binshad",
+        location: "Malappuram",
+        crop: "banana",
+        time: "5h ago",
+        image: "banana.jpg",
+        text: "Leaves curling and stems have black streaks.",
+        diagnosis: "#Thrips"
+      },
+      {
+        user: "Meera",
+        location: "Thrissur",
+        crop: "bean",
+        time: "3h ago",
+        image: "bean.jpg",
+        text: "Yellowing rapidly. No pests visible.",
+        diagnosis: "#PotassiumDeficiency"
+      },
+      {
+        user: "Lakshmi",
+        location: "Alappuzha",
+        crop: "tomato",
+        time: "Just now",
+        image: "tomato.jpg",
+        text: "Tomato leaves curling upwards. Suspecting viral infection.",
+        diagnosis: "#LeafCurlVirus"
+      }
+    ];
+
+    function renderPosts(batch = posts) {
+      const container = document.getElementById("feedContainer");
+      container.innerHTML = "";
+      batch.forEach((post, index) => {
+        const card = document.createElement("div");
+        card.className = "feed-card";
+        card.innerHTML = `
+          <div class="feed-header">
+            <span><strong>${post.user}</strong> • ${post.location} • ${cropIcon(post.crop)} ${capitalize(post.crop)}</span>
+            <span>${post.time}</span>
+          </div>
+          <img src="${post.image}" class="feed-image" />
+          <div class="feed-body">
+            ${post.text}<br>
+            Diagnosis: <span class="highlight">${post.diagnosis}</span>
+          </div>
+          <button class="treatment-btn" onclick="alert('🩺 Treatment guide coming soon')">🩺 See Treatment</button>
+          <div class="feed-actions">
+            <div onclick="toggleLike(this)">👍 Like <span class="count">0</span></div>
+
+                          <div onclick="toggleComment(${index})">💬 Comment</div>
+            <div onclick="alert('🌐 Translate coming soon')">🌐 Translate</div>
+            <div onclick="alert('✅ Answer coming soon')">✅ Answer</div>
+            <div onclick="alert('🔁 Shared')">🔁 Share</div>
+          </div>
+          <div class="comment-box" id="comment-${index}">
+            <input type="text" placeholder="Write a comment..." />
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function cropIcon(crop) {
+      return { banana: "🍌", bean: "🌱", tomato: "🍅", paddy: "🌾" }[crop] || "🌿";
+    }
+
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function filterPosts(crop) {
+      document.querySelectorAll(".pill").forEach(p => p.classList.remove("active"));
+      document.querySelector(`.pill[onclick*="${crop}"]`).classList.add("active");
+      const filtered = posts.filter(p => p.crop === crop);
+      renderPosts(filtered);
+    }
+
+    function toggleLike(el) {
+      const countSpan = el.querySelector(".count");
+      let count = parseInt(countSpan.textContent);
+
+      if (el.classList.contains("active")) {
+        el.classList.remove("active");
+        countSpan.textContent = count - 1;
+      } else {
+        el.classList.add("active");
+        countSpan.textContent = count + 1;
+        el.style.transform = "scale(1.2)";
+        setTimeout(() => {
+          el.style.transform = "scale(1)";
+        }, 150);
+      }
+    }
+
+    function toggleComment(index) {
+      const box = document.getElementById(`comment-${index}`);
+      box.style.display = box.style.display === "block" ? "none" : "block";
+    }
+
+    function addPost() {
+      alert("📝 Post creation coming soon!");
+      // You can redirect to a form page like:
+      // window.location.href = "createPost.html";
+    }
+    function showAlert() {
+       alert("🔔 Alert button clicked! Customize this action as needed.");
+
+    }
+
+    // Initial render
+    renderPosts(posts);
+  </script>
+</body>
+</html>

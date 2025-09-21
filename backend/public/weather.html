@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🌦️ Live Weather Advisory</title>
+  <style>
+
+    /* .cont {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  
+  flex-wrap: wrap;
+  padding: 15px 20px;
+  margin: 25px auto;
+  border-radius: 15px;
+  border: 1px solid #cfd8dc;
+  background-color: #fff;
+  max-width: 900px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+} */
+label {
+  font-weight: 600;
+  color: #396270;
+}
+select {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #90a4ae;
+  font-size: 1em;
+  cursor: pointer;
+  background: #fafafa;
+  transition: 0.3s;
+}
+select:hover {
+  border-color: #2e7d32;
+}
+
+    #liveWeatherInfo {
+  margin: 20px auto;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  max-width: 800px;
+  font-size: 1.05em;
+  line-height: 1.6;
+}
+#liveWeatherInfo strong {
+  color: #2e7d32;
+}
+
+#liveWeatherInfo h4 {
+  margin-top: 20px;
+  color: #396270;
+}
+#liveWeatherInfo > div {
+  margin-bottom: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #f9f9f9;
+  border-left: 4px solid #2e7d32;
+}
+
+#liveWeatherInfo > div:hover {
+  background: #f1faf5;
+  transform: translateY(-2px);
+  transition: all 0.2s ease-in-out;
+}
+
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f0f8f5;
+      color: #333;
+    }
+    h1 {
+      color: #396270;
+      text-align: center;
+    }
+    select {
+      margin: 10px 0;
+      padding: 6px;
+      font-size: 1em;
+    }
+    #liveWeatherInfo {
+      margin-top: 20px;
+      background: #fff;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    hr {
+      margin: 20px 0;
+    }
+
+    .cont{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+      padding: 10px;
+      margin: 35px;
+      border-radius: 25px;
+      border: 1px solid #ccc;
+       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      background-color: #fffbea;   
+    }
+
+  </style>
+</head>
+<body>
+  <h1 id="weatherTitle">🌦️ Live Weather Advisory</h1>
+
+  <div class="cont">
+  <label for="languageSelect">🌐 Language:</label>
+  <select id="languageSelect">
+    <option value="en">English</option>
+    <option value="hi">हिन्दी</option>
+    <option value="ml">മലയാളം</option>
+  </select>
+
+
+  <label for="districtSelect">🏞️ District:</label>
+  <select id="districtSelect">
+    <option value="Thiruvananthapuram">Thiruvananthapuram</option>
+    <option value="Kollam">Kollam</option>
+    <option value="Pathanamthitta">Pathanamthitta</option>
+    <option value="Alappuzha">Alappuzha</option>
+    <option value="Kottayam">Kottayam</option>
+    <option value="Idukki">Idukki</option>
+    <option value="Ernakulam">Ernakulam</option>
+    <option value="Thrissur">Thrissur</option>
+    <option value="Palakkad">Palakkad</option>
+    <option value="Malappuram">Malappuram</option>
+    <option value="Kozhikode">Kozhikode</option>
+    <option value="Wayanad">Wayanad</option>
+    <option value="Kannur">Kannur</option>
+    <option value="Kasaragod">Kasaragod</option>
+  </select>
+
+  
+
+  <label for="cropSelect">🌾 Crop:</label>
+  <select id="cropSelect">
+    <option value="paddy">Paddy</option>
+    <option value="banana">Banana</option>
+    <option value="coconut">Coconut</option>
+    <option value="pepper">Pepper</option>
+    <option value="vegetables">Vegetables</option>
+    <option value="arecanut">Arecanut</option>
+  </select>
+</div>
+  <div id="liveWeatherInfo"></div>
+
+  <!-- Weather Advisory Script -->
+  <script>
+    let LANGUAGE = "en";
+    let SELECTED_CROP = "paddy";
+   // 🌐 Translations
+const weatherTranslations = {
+  en: {
+    title: "Live Weather Advisory",
+    error: "Error fetching weather.",
+    unavailable: "Weather data unavailable.",
+    labels: {
+      temp: "Temperature",
+      wind: "Wind Speed",
+      humidity: "Humidity",
+      condition: "Condition",
+      precipitation: "Rain Chance",
+      advisory: "Advisory"
+    }
+  },
+  hi: {
+    title: "ताज़ा मौसम सलाह",
+    error: "मौसम डेटा प्राप्त करने में त्रुटि।",
+    unavailable: "मौसम डेटा उपलब्ध नहीं है।",
+    labels: {
+      temp: "तापमान",
+      wind: "पवन गति",
+      humidity: "नमी",
+      condition: "स्थिति",
+      precipitation: "वर्षा संभावना",
+      advisory: "सलाह"
+    }
+  },
+  ml: {
+    title: "തത്സമയ കാലാവസ്ഥാ ഉപദേശം",
+    error: "കാലാവസ്ഥാ ഡാറ്റ ലഭ്യമാക്കുന്നതിൽ പിശക്.",
+    unavailable: "കാലാവസ്ഥാ ഡാറ്റ ലഭ്യമല്ല.",
+    labels: {
+      temp: "താപനില",
+      wind: "കാറ്റിന്റെ വേഗത",
+      humidity: "ആർദ്രത",
+      condition: "കാലാവസ്ഥ",
+      precipitation: "മഴയുടെ സാധ്യത",
+      advisory: "ഉപദേശം"
+    }
+  }
+};
+
+const advisoryTranslations = {
+  en: {
+    transplanting: "✅ Good for transplanting and irrigation.",
+    avoidTransplanting: "⚠ Heavy rain may damage seedlings. Avoid transplanting.",
+    highWind: "💨 High wind. Avoid spraying.",
+    fieldPrep: "ℹ️ Monitor soil moisture. Ideal for field prep.",
+    waterlogging: "⚠ Risk of waterlogging. Ensure drainage.",
+    suckerPlanting: "✅ Good for sucker planting.",
+    interculturalOps: "ℹ️ Stable weather. Proceed with intercultural operations.",
+    basinIrrigation: "✅ Ideal for basin irrigation.",
+    pestNeutral: "ℹ️ Monitor pest activity. Weather is neutral.",
+    mulching: "✅ Good for mulching and nutrient application.",
+    leafDamage: "💨 Avoid spraying. Risk of leaf damage.",
+    seedRot: "⚠ Delay sowing. Risk of seed rot.",
+    leafySowing: "✅ Favorable for sowing leafy vegetables.",
+    nurseryMgmt: "ℹ️ Proceed with nursery management.",
+    runoffRisk: "⚠ Avoid pesticide spraying. Risk of runoff.",
+    fertilizer: "✅ Good for fertilizer application.",
+    crownRot: "ℹ️ Monitor crown rot. Weather is manageable.",
+    stable: "ℹ️ Weather stable. Proceed with regular activities."
+  },
+  hi: {
+    transplanting: "✅ रोपाई और सिंचाई के लिए उपयुक्त।",
+    avoidTransplanting: "⚠ भारी वर्षा से पौधों को नुकसान हो सकता है। रोपाई से बचें।",
+    highWind: "💨 तेज़ हवा। छिड़काव से बचें।",
+    fieldPrep: "ℹ️ मिट्टी की नमी की निगरानी करें। खेत तैयारी के लिए उपयुक्त।",
+    waterlogging: "⚠ जलभराव का खतरा। जल निकासी सुनिश्चित करें।",
+    suckerPlanting: "✅ सकर लगाने के लिए उपयुक्त।",
+    interculturalOps: "ℹ️ मौसम स्थिर है। सामान्य कार्य जारी रखें।",
+    basinIrrigation: "✅ बेसिन सिंचाई के लिए उपयुक्त।",
+    pestNeutral: "ℹ️ कीट गतिविधि की निगरानी करें। मौसम सामान्य है।",
+    mulching: "✅ मल्चिंग और पोषक तत्व देने के लिए उपयुक्त।",
+    leafDamage: "💨 छिड़काव से बचें। पत्तियों को नुकसान हो सकता है।",
+    seedRot: "⚠ बुवाई टालें। बीज सड़ने का खतरा।",
+    leafySowing: "✅ पत्तेदार सब्जियों की बुवाई के लिए अनुकूल।",
+    nurseryMgmt: "ℹ️ नर्सरी प्रबंधन जारी रखें।",
+    runoffRisk: "⚠ छिड़काव से बचें। बहाव का खतरा।",
+    fertilizer: "✅ उर्वरक देने के लिए उपयुक्त।",
+    crownRot: "ℹ️ क्राउन रॉट की निगरानी करें। मौसम अनुकूल है।",
+    stable: "ℹ️ मौसम स्थिर है। सामान्य कार्य करें।"
+  },
+  ml: {
+    transplanting: "✅ നട്ട് നിൽക്കാനും ജലസേചനത്തിനും അനുയോജ്യം.",
+    avoidTransplanting: "⚠ ശക്തമായ മഴ ചെടികൾക്ക് ഹാനികരമാണ്. നട്ട് നിൽക്കുന്നത് ഒഴിവാക്കുക.",
+    highWind: "💨 ശക്തമായ കാറ്റ്. സ്പ്രേ ചെയ്യുന്നത് ഒഴിവാക്കുക.",
+    fieldPrep: "ℹ️ മണ്ണിലെ ഈർപ്പം നിരീക്ഷിക്കുക. വയൽ തയ്യാറാക്കാൻ അനുയോജ്യം.",
+    waterlogging: "⚠ വെള്ളം കെട്ടി നിൽക്കാനുള്ള സാധ്യത. ഡ്രെയിനേജ് ഉറപ്പാക്കുക.",
+    suckerPlanting: "✅ സക്കർ നട്ടുവയ്ക്കാൻ അനുയോജ്യം.",
+    interculturalOps: "ℹ️ കാലാവസ്ഥ സ്ഥിരമാണ്. സാധാരണ പ്രവർത്തനങ്ങൾ തുടരുക.",
+    basinIrrigation: "✅ ബേസിൻ ജലസേചനത്തിനും അനുയോജ്യം.",
+    pestNeutral: "ℹ️ കീട പ്രവർത്തനം നിരീക്ഷിക്കുക. കാലാവസ്ഥ സാധാരണമാണ്.",
+    mulching: "✅ മൾച്ചിംഗിനും പോഷകങ്ങൾ നൽകുന്നതിനും അനുയോജ്യം.",
+    leafDamage: "💨 സ്പ്രേ ഒഴിവാക്കുക. ഇലകൾക്ക് ഹാനികരമാണ്.",
+    seedRot: "⚠ വിതച്ച വിത്തുകൾ കുഴയാനുള്ള സാധ്യത. വിതയ്ക്കുന്നത് ഒഴിവാക്കുക.",
+    leafySowing: "✅ ഇലക്കറികൾ വിതയ്ക്കാൻ അനുയോജ്യം.",
+    nurseryMgmt: "ℹ️ നഴ്‌സറി മാനേജ്മെന്റ് തുടരുക.",
+    runoffRisk: "⚠ സ്പ്രേ ഒഴിവാക്കുക. ഒഴുകി പോകാനുള്ള സാധ്യത.",
+    fertilizer: "✅ വളം നൽകാൻ അനുയോജ്യം.",
+    crownRot: "ℹ️ ക്രൗൺ റോട്ടിന്റെ നിരീക്ഷണം നടത്തുക. കാലാവസ്ഥ അനുയോജ്യമാണ്.",
+    stable: "ℹ️ കാലാവസ്ഥ സ്ഥിരമാണ്. സാധാരണ പ്രവർത്തനങ്ങൾ തുടരുക."
+  }
+};
+
+const districtCoordinates = {
+  Thiruvananthapuram: { lat: 8.5241, lon: 76.9366 },
+  Kollam: { lat: 8.8811, lon: 76.5846 },
+  Pathanamthitta: { lat: 9.2647, lon: 76.7870 },
+  Alappuzha: { lat: 9.4981, lon: 76.3388 },
+  Kottayam: { lat: 9.5916, lon: 76.5222 },
+  Idukki: { lat: 9.8490, lon: 77.1150 },
+  Ernakulam: { lat: 10.0850, lon: 76.5843 },
+  Thrissur: { lat: 10.5276, lon: 76.2144 },
+  Palakkad: { lat: 10.7867, lon: 76.6548 },
+  Malappuram: { lat: 11.0734, lon: 76.0711 },
+  Kozhikode: { lat: 11.2588, lon: 75.7804 },
+  Wayanad: { lat: 11.7154, lon: 76.1320 },
+  Kannur: { lat: 11.8745, lon: 75.3704 },
+  Kasaragod: { lat: 12.5000, lon: 75.0000 }
+};
+
+function updateHeaders() {
+  const titleEl = document.getElementById("weatherTitle");
+  if (titleEl) titleEl.innerText = "Live Weather Advisory";
+}
+
+function updateWeatherLabels() {
+  const t = weatherTranslations[LANGUAGE];
+  const titleEl = document.getElementById("weatherTitle");
+  if (titleEl) titleEl.innerText = t.title;
+}
+
+function getCropAdvisory(crop, rain, humidity, maxTemp, wind) {
+  const a = advisoryTranslations[LANGUAGE];
+  switch (crop.toLowerCase()) {
+    case "paddy":
+      if (rain >= 70) return a.avoidTransplanting;
+      if (rain >= 40 && humidity >= 80) return a.transplanting;
+      if (wind >= 25) return a.highWind;
+      return a.fieldPrep;
+    case "banana":
+      if (rain >= 60) return a.waterlogging;
+      if (humidity >= 85 && maxTemp <= 35) return a.suckerPlanting;
+      return a.intercultural ;     return a.interculturalOps;
+
+    case "coconut":
+      if (rain >= 70) return a.runoffRisk;
+      if (humidity >= 75 && wind < 20) return a.basinIrrigation;
+      return a.pestNeutral;
+
+    case "pepper":
+      if (rain >= 50 && humidity >= 80) return a.mulching;
+      if (wind >= 30) return a.leafDamage;
+      return a.pestNeutral;
+
+    case "vegetables":
+      if (rain >= 60) return a.seedRot;
+      if (humidity >= 80 && maxTemp <= 32) return a.leafySowing;
+      return a.nurseryMgmt;
+
+    case "arecanut":
+      if (rain >= 70) return a.runoffRisk;
+      if (humidity >= 75 && wind < 20) return a.fertilizer;
+      return a.crownRot;
+
+    default:
+      return a.stable;
+  }
+}
+function updateHeaders() {
+  const titleEl = document.getElementById("weatherTitle");
+  if (titleEl) titleEl.innerText = "Live Weather Advisory";
+}
+
+function updateWeatherLabels() {
+  const t = weatherTranslations[LANGUAGE];
+  const titleEl = document.getElementById("weatherTitle");
+  if (titleEl) titleEl.innerText = t.title;
+}
+const weatherCodesLocalized = {
+  0: { en: "Clear sky ☀", hi: "साफ़ आकाश ☀", ml: "സ്വച്ഛമായ ആകാശം ☀" },
+  1: { en: "Mainly clear 🌤", hi: "मुख्यतः साफ़ 🌤", ml: "അധികം സ്വച്ഛം 🌤" },
+  2: { en: "Partly cloudy ⛅", hi: "आंशिक रूप से बादल ⛅", ml: "ഭാഗികമായി മേഘാവൃതം ⛅" },
+  3: { en: "Overcast ☁", hi: "पूरा बादल ☁", ml: "മുഴുവൻ മേഘാവൃതം ☁" },
+  45: { en: "Fog 🌫", hi: "कोहरा 🌫", ml: "മൂടൽമഞ്ഞ് 🌫" },
+  61: { en: "Light rain 🌧", hi: "हल्की बारिश 🌧", ml: "ഇളിയ മഴ 🌧" },
+  80: { en: "Rain showers 🌦", hi: "बारिश की बौछारें 🌦", ml: "മഴയുടെ തുള്ളികൾ 🌦" }
+};
+// 🌦️ Fetch weather manually by district
+async function fetchLiveWeather(district = "Thiruvananthapuram", crop = "paddy") {
+  const coords = districtCoordinates[district];
+  const t = weatherTranslations[LANGUAGE];
+  const infoBox = document.getElementById("liveWeatherInfo");
+
+  if (!infoBox || !coords) {
+    infoBox.innerText = t.unavailable;
+    return;
+  }
+
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}&current_weather=true&daily=temperature_2m_max,temperature_2m_min,weathercode,windspeed_10m_max,precipitation_probability_max&hourly=relative_humidity_2m,precipitation_probability&timezone=auto`;
+
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data && data.current_weather) {
+      const temp = data.current_weather.temperature;
+      const wind = data.current_weather.windspeed;
+      const code = data.current_weather.weathercode;
+      const condition = weatherCodesLocalized[code]?.[LANGUAGE] || "Unknown";
+
+      let humidity = "—", rainChance = "—";
+      const nowHour = new Date().toISOString().slice(0, 13);
+      const index = data.hourly.time.findIndex(t => t.startsWith(nowHour));
+      if (index !== -1) {
+        humidity = data.hourly.relative_humidity_2m?.[index] + "%" || "—";
+        rainChance = data.hourly.precipitation_probability?.[index] + "%" || "—";
+      }
+
+      const advisory = getCropAdvisory(crop, parseInt(rainChance), parseInt(humidity), temp, wind);
+
+      infoBox.innerHTML = `
+        <strong>${t.labels.temp}:</strong> ${temp}°C<br>
+        <strong>${t.labels.wind}:</strong> ${wind} km/h<br>
+        <strong>${t.labels.humidity}:</strong> ${humidity}<br>
+        <strong>${t.labels.precipitation}:</strong> ${rainChance}<br>
+        <strong>${t.labels.condition}:</strong> ${condition}<br>
+        <strong>${t.labels.advisory}:</strong> ${advisory}
+      `;
+    } else {
+      infoBox.innerText = t.unavailable;
+    }
+
+    // 📅 3-Day Forecast
+    if (data && data.daily) {
+      const daily = data.daily;
+      let forecastHTML = `<hr><h4>📅 3-Day Forecast</h4>`;
+
+      for (let i = 0; i < 3; i++) {
+        const dateObj = new Date(daily.time[i]);
+        const date = dateObj.toLocaleDateString();
+        const day = dateObj.toLocaleDateString(undefined, { weekday: 'long' });
+
+        const min = daily.temperature_2m_min[i];
+        const max = daily.temperature_2m_max[i];
+        const wind = daily.windspeed_10m_max?.[i] ?? "—";
+        const rain = daily.precipitation_probability_max?.[i] ?? "—";
+        const code = daily.weathercode[i];
+        const condition = weatherCodesLocalized[code]?.[LANGUAGE] || "Unknown";
+
+        let humidity = "—";
+        const targetHour = daily.time[i] + "T08:00";
+        const index = data.hourly.time.findIndex(t => t === targetHour);
+        if (index !== -1) {
+          humidity = data.hourly.relative_humidity_2m[index] + "%";
+        }
+
+        const advisory = getCropAdvisory(crop, parseInt(rain), parseInt(humidity), max, wind);
+
+        forecastHTML += `
+          <div style="margin-bottom: 12px; padding: 8px; border-left: 3px solid #007BFF;">
+            <strong>${day}, ${date}</strong><br>
+            🌡 ${t.labels.temp}: ${min}°C – ${max}°C<br>
+            💧 ${t.labels.humidity}: ${humidity}<br>
+            🌬 ${t.labels.wind}: ${wind} km/h<br>
+            ☔ ${t.labels.precipitation}: ${rain}%<br>
+            🌥 ${t.labels.condition}: ${condition}<br>
+            🌾 ${t.labels.advisory}: ${advisory}
+          </div>
+        `;
+      }
+
+      infoBox.innerHTML += forecastHTML;
+    }
+  } catch (err) {
+    console.error("Weather fetch failed:", err);
+    infoBox.innerText = t.error;
+  }
+}
+
+document.getElementById("languageSelect").addEventListener("change", (e) => {
+  LANGUAGE = e.target.value;
+  updateWeatherLabels();
+  SELECTED_CROP = document.getElementById("cropSelect").value;
+  fetchLiveWeather(document.getElementById("districtSelect").value, SELECTED_CROP);
+});
+
+document.getElementById("districtSelect").addEventListener("change", (e) => {
+  SELECTED_CROP = document.getElementById("cropSelect").value;
+  fetchLiveWeather(e.target.value, SELECTED_CROP);
+});
+
+document.getElementById("cropSelect").addEventListener("change", (e) => {
+  SELECTED_CROP = e.target.value;
+  fetchLiveWeather(document.getElementById("districtSelect").value, SELECTED_CROP);
+});
+
+window.onload = function () {
+  updateHeaders();
+  updateWeatherLabels();
+  SELECTED_CROP = document.getElementById("cropSelect").value;
+  fetchLiveWeather(document.getElementById("districtSelect").value, SELECTED_CROP);
+};
+  </script>
+</body>
+</html>

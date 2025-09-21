@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🌾 Subsidy Finder</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background:  #F1FAF0;
+      color: #333;
+    }
+    h1 {
+      color: #2e7d32;
+      text-align: center;
+    }
+    /* .subsidy-card {
+      background-color: rgb(178, 178, 178);
+      width: 500px;
+      height: 500px;
+      padding: 12px;
+      margin-left: 500px;
+      margin-bottom: 12px;
+      border-radius: 6px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    } */
+    input[type="text"], select {
+      margin-top: 10px;
+      padding: 6px;
+      font-size: 1em;
+    }
+    a {
+      color: #007BFF;
+      text-decoration: none;
+    }
+     .cont{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+      padding: 10px;
+       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin: 35px;
+      border-radius: 25px;
+      border: 1px solid #ccc;
+      background-color: #fffbea;   
+    }
+    
+      
+      .subsidy-card {
+    background-color: #f4f4f4;
+    width: 500px;
+    padding: 14px;
+    height: 450px;
+    margin: 20px auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    text-align: left;
+  }
+.subsidy-card img {
+  display: block;
+  width: 100%;
+  max-height: 300px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+  </style>
+</head>
+<body>
+  <h1 id="title">🌾 Subsidy Finder</h1>
+
+  <div class="cont">
+  <label for="languageSelect">🌐 Language:</label>
+  <select id="languageSelect">
+    <option value="en">English</option>
+    <option value="hi">हिन्दी</option>
+    <option value="ml">മലയാളം</option>
+  </select>
+
+
+
+  <label for="subsidySearch">🔍 Search Crop or Scheme:</label>
+  <input type="text" id="subsidySearch" placeholder="Search crop or scheme..." />
+  </div>
+
+  <div id="subsidy-results" class="subsi"></div>
+
+  <!-- PapaParse for CSV parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+  <!-- Subsidy Finder Script -->
+  <script>
+    const SHEET_URL2 = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSB6g-wtObmOPOA5dAqM0zndKq1xnrCaQnqvOO84qGeCts2QEcNlmnFP54bz6i2iIYCzLkV-PfBqFZE/pub?output=csv";
+    let allSchemes = [];
+    let LANGUAGE = "en";
+
+    const translations = {
+      en: {
+        title: "🌾 Subsidy Finder",
+        searchPlaceholder: "Search crop or scheme...",
+        noResults: "❌ No matching subsidies found.",
+        enterQuery: "🔍 Please enter a crop or scheme name.",
+        crop: "Crop",
+        region: "Region",
+        category: "Category",
+        scheme: "Scheme",
+        description: "Description",
+        eligibility: "Eligibility"
+      },
+      hi: {
+        title: "🌾 सब्सिडी खोज",
+        searchPlaceholder: "फसल या योजना खोजें...",
+        noResults: "❌ कोई मिलती-जुलती योजना नहीं मिली।",
+        enterQuery: "🔍 कृपया फसल या योजना का नाम दर्ज करें।",
+        crop: "फसल",
+        region: "क्षेत्र",
+        category: "श्रेणी",
+        scheme: "योजना",
+        description: "विवरण",
+        eligibility: "पात्रता"
+      },
+      ml: {
+        title: "🌾 സബ്സിഡി ഫൈൻഡർ",
+        searchPlaceholder: "വിളയോ പദ്ധതിയോ തിരയുക...",
+        noResults: "❌ യാതൊരു പൊരുത്തമുള്ള പദ്ധതി കണ്ടെത്തിയില്ല.",
+        enterQuery: "🔍 പദ്ധതിയുടെ പേര് നൽകുക.",
+        crop: "വിള",
+        region: "പ്രദേശം",
+        category: "വിഭാഗം",
+        scheme: "പദ്ധതി",
+        description: "വിവരണം",
+        eligibility: "യോഗ്യത"
+      }
+    };
+ 
+  const cropImages = {
+    banana: "bana1.jpg",
+    rice:"rice1.jpg",
+    paddy: "paddy.jpg",
+    coconut:"coco.jpg",
+    arecanut:"arecanut.jpg",
+    vegetables:"vege.jpg",
+    tapioca:"tapioca.jpg",
+    cocoa: "cocoa.jpg",
+    pepper:"pepp1.jpg",
+    ginger:"ginger1.jpg",
+    turmeric:"turmeric1.jpg",
+    jackfruit:"jackfruit.jpg",
+    rubber:"rubber.jpg",
+    mango:"mango.jpg",
+    pulse:"pulse.jpg",
+    tomato:"tomato.jpg",
+
+  }
+
+    function updateUI() {
+      const t = translations[LANGUAGE];
+      document.getElementById("title").innerText = t.title;
+      document.getElementById("subsidySearch").placeholder = t.searchPlaceholder;
+    }
+
+    function renderSchemes(data, query = "") {
+      const container = document.getElementById("subsidy-results");
+      const t = translations[LANGUAGE];
+      container.innerHTML = "";
+
+      if (query === "") {
+        container.innerHTML = `<div>${t.enterQuery}</div>`;
+        return;
+      }
+
+      if (data.length === 0) {
+        container.innerHTML = `<div>${t.noResults}</div>`;
+        return;
+      }
+
+      data.forEach(item => {
+         const cropName = item.Crop?.toLowerCase();
+  const cropImg = cropImages[cropName] || "https://via.placeholder.com/150?text=No+Image";
+        container.innerHTML += `
+          <div class="subsidy-card">
+            <img src="${cropImg}" alt="${item.Crop}" style="width:100%; max-height:200px; object-fit:cover; border-radius:6px; margin-bottom:10px;">
+            🌾 ${t.crop}: ${item.Crop}<br>
+            📍 ${t.region}: ${item.Region}<br>
+            🧑‍🌾 ${t.category}: ${item.Category}<br>
+            📝 ${t.scheme}: ${item["Scheme Name"]}<br>
+            📌 ${t.description}: ${item.Description}<br>
+            ✅ ${t.eligibility}: ${item.Eligibility}<br>
+            🔗 <a href="${item.Link}" target="_blank">More Info</a>
+          </div>
+        `;
+      });
+    }
+
+    fetch(SHEET_URL2)
+      .then(res => res.text())
+      .then(csv => {
+        const parsed = Papa.parse(csv, { header: true });
+        allSchemes = parsed.data.filter(row => row.Crop && row["Scheme Name"]);
+        renderSchemes([], "");
+      })
+      .catch(err => {
+        console.error("Fetch error:", err);
+        document.getElementById("subsidy-results").innerHTML = "⚠ Failed to load subsidy data.";
+      });
+
+    document.getElementById("subsidySearch").addEventListener("input", (e) => {
+      const query = e.target.value.toLowerCase().trim();
+      const filtered = allSchemes.filter(item =>
+        item.Crop?.toLowerCase().includes(query) ||
+        item["Scheme Name"]?.toLowerCase().includes(query)
+      );
+      renderSchemes(filtered, query);
+    });
+
+    document.getElementById("languageSelect").addEventListener("change", (e) => {
+      LANGUAGE = e.target.value;
+      updateUI();
+      renderSchemes([], "");
+    });
+
+    window.onload = () => {
+      updateUI();
+      renderSchemes([], "");
+    };
+  </script>
+</body>
+</html>
