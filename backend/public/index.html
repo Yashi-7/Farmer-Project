@@ -78,8 +78,10 @@ password" />
        NAVIGATION BAR 
   ============================== --> 
   <nav id="navbar" class="transparent" role="navigation" aria-label="Primary Navigation"> 
+
     <a href="#" class="logo"> 
       <i class="fas fa-globe-americas logo-icon" aria-hidden="true"></i> KS 
+     
     </a> 
  
     <div class="nav-items"> 
@@ -104,10 +106,7 @@ password" />
         </div> 
       </div> 
  
-      <!-- Settings Button --> 
-      <button class="icon-button" type="button" aria-label="Settings"> 
-        <i class="fas fa-cog" aria-hidden="true"></i> 
-      </button> 
+    
  
       <!-- Login Button  -->
        <a href="http://localhost:4000/user/login" id="loginBtn" class="nav-item">Login</a> 
@@ -192,7 +191,7 @@ password" />
       <!-- Feature 1: Crop Calendar --> 
       <article class="card" aria-labelledby="feature1-title"> 
         <h3 id="feature1-title"> Crop calendar</h3> 
-        <img src="crop.jpg">
+        <img src="farmer-pro.jpg">
         <p>Plan sowing & harvesting with smart reminders.</p> 
         <!-- <div class="highlight-box yellow" aria-live="polite">Wheat Market <br /><small>Last 7 days</small></div>  -->
         <button  onclick="window.location.href='crop-calendar.html'" class="btn btn-yellow" type="button" >View calendar</button> 
@@ -341,7 +340,7 @@ table-formal-suit_769609-327.jpg" alt="Soil Expert" class="profile-pic" />
  
 
       <!-- Join Button -->
-  <button onclick="window.location.href='index4.html'" id="openModalBtn" class="btn" style="background-color: #e53935;">🔐 Join Community</button>
+  <button onclick="window.location.href='index4.html'" id="openModalBtn" class="btn btn-community" style="background-color: #39c021;">🔐 Join Community</button>
 
   <!-- First Modal -->
   <div id="loginModal" class="modal">
@@ -384,13 +383,14 @@ table-formal-suit_769609-327.jpg" alt="Soil Expert" class="profile-pic" />
   <section class="article-tips" aria-label="Main articles and daily tips" id="knowledge"> 
    
     <!-- Main Articles --> 
+
     <div class="main-article"> 
       <h2>MAIN ARTICLE</h2> 
  
       <article class="article-card" aria-labelledby="article1-title"> 
         <img src="vertical-shot-paddy-fields-daylight.jpg" alt="Rice Cultivation"> 
         <div class="article-content"> 
-          <h3 id="article1-title">Learn methods of rice cultivation specific to Kerala.</h3> 
+          <p id="article1-title">Learn the traditional and modern methods of rice cultivation specific to Kerala's climate and soil conditions.</p> 
           <p class="time">⏱ 8 min read</p> 
         </div> 
       </article> 
@@ -398,7 +398,7 @@ table-formal-suit_769609-327.jpg" alt="Soil Expert" class="profile-pic" />
       <article class="article-card" aria-labelledby="article2-title"> 
         <img src="black-pepper.jpg" alt="Black"> 
          <div class="article-content"> 
-          <h3>Guide to prevent and treat diseases in black pepper.</h3> 
+          <p>Comprehensive guide to prevent and treat common diseases affecting black pepper cultivation in Kerala.</p> 
           <p class="time">⏱ 12 min read</p> 
         </div> 
       </div> 
@@ -407,8 +407,9 @@ table-formal-suit_769609-327.jpg" alt="Soil Expert" class="profile-pic" />
     <!-- Daily Tips --> 
     <div class="daily-tips"> 
       <h2>DAILY TIPS</h2> 
-      <div class="tip-card green"><h4>   Daily tips</h4><p>Ensure good drainage during monsoon</p></div> 
-      <div class="tip-card orange"><h4>    Weather warning</h4><p>Heavy rain expected for 3 days</p></div> 
+      <div class="tip-card green"><h4>   Daily tips</h4><p>Today's Tip
+Ensure good drainage to avoid waterlogging during the rainy season.</p></div> 
+      <div class="tip-card orange"><h4>    Weather warning</h4><p>Heavy rain expected for the next 3 days.</p></div> 
     </div> 
     </div>
   </section> 
@@ -416,17 +417,30 @@ table-formal-suit_769609-327.jpg" alt="Soil Expert" class="profile-pic" />
   <!-- ============================= 
        APP PROMO SECTION 
   ============================== --> 
+  
   <section class="app-promo"> 
     <div class="promo-text"> 
       <h3>Get instant access to farming advice even without internet connection</h3> 
       <ul> 
-        <li><b>Internet:</b> Can be used without internet</li> 
-        <li><b>Voice Command:</b> Speak in Malayalam</li> 
-        <li><b>Smart Alert:</b> Weather & Agriculture Alerts</li> 
+        <div class="inter"><img src="internet.png" class="intern">
+          <p><b>Internet:</b> <br>Can be used without internet</p>
+        </div> 
+        <div class="inter">
+          <img src="micro.png" class="intern">
+          <p><b>Voice Command:</b> <br>Speak in Malayalam</p>
+        </div>
+          
+        <div class="inter">
+          <img src="bell.png" class="intern">
+          <p><b>Smart Alert:</b> <br>Weather & Agriculture Alerts</p>
+          </div> 
       </ul> 
       <div class="app-buttons"> 
-        <a> <i class="fa-brands fa-app-store"></i> </a>
-        <a><i class="fa-brands fa-google-play"></i></a>
+        <div class="app">
+          <img src="app.png">
+          <p>Downlaod from <br> App store </p>
+        </div>
+        <div class="play"><a><i class="fa-brands fa-google-play"></i> Get now on <br> Play store</a></div>
       </div> 
     </div> 
     <div class="promo-img"> 
