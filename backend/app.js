@@ -1,10 +1,12 @@
-require('dotenv').config()
+require('dotenv').config();
 const express= require('express');
 const app = express();
 const userRouter = require('./routes/user.routes')
 const connectToDb = require('./config/db')
-connectToDb();
 const cookieParser = require('cookie-parser')
+
+connectToDb();
+
 
 
 app.set("view engine" , 'ejs')
